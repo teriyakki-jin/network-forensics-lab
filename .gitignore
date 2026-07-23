@@ -1,0 +1,15 @@
+# Local runtime and editor artifacts
+.env
+.idea/
+.vscode/
+*.log
+*.tmp
+
+# Packet captures generated outside the committed sample
+evidence/*.pcap
+!evidence/lab-traffic.pcap
+
+# Elastic/Docker local state
+data/
+docker-data/
+*.pid

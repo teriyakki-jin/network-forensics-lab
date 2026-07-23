@@ -1,0 +1,100 @@
+name: network-forensics-lab
+
+services:
+  victim:
+    image: nginx:1.27-alpine
+    container_name: nf-victim
+    networks:
+      lab_net:
+        ipv4_address: 10.77.0.10
+    restart: unless-stopped
+
+  kali:
+    build:
+      context: ./kali
+    container_name: nf-kali
+    command: ["sleep", "infinity"]
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./evidence:/evidence
+    networks:
+      lab_net:
+        ipv4_address: 10.77.0.20
+    restart: unless-stopped
+
+  snort:
+    image: ciscotalos/snort3:latest
+    profiles: ["tools"]
+    entrypoint: ["/bin/sh", "/rules/run-snort.sh"]
+    volumes:
+      - ./evidence:/evidence:ro
+      - ./alerts:/alerts
+      - ./snort:/rules:ro
+    network_mode: none
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    container_name: nf-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - soc_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.4.2
+    container_name: nf-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      NODE_OPTIONS: "--max-old-space-size=768"
+    ports:
+      - "127.0.0.1:5601:5601"
+    networks:
+      - soc_net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.4.2
+    container_name: nf-logstash
+    environment:
+      LS_JAVA_OPTS: "-Xms384m -Xmx384m"
+      pipeline.workers: "1"
+      pipeline.batch.size: "50"
+    volumes:
+      - ./alerts:/alerts:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - logstash_data:/usr/share/logstash/data
+    networks:
+      - soc_net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  lab_net:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.77.0.0/24
+  soc_net: {}
+
+volumes:
+  elastic_data:
+  logstash_data:
