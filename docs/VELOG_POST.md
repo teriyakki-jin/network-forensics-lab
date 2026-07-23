@@ -391,5 +391,5 @@ Kali에서 만든 한 번의 요청이 PCAP에 기록되고, Snort 규칙에 탐
 
 네트워크 포렌식이나 탐지 엔지니어링을 공부한다면 도구별 실습에서 멈추지 않고, 작은 환경이라도 **원본 증거 → 탐지 이벤트 → 분석 화면 → 검증 지표**를 하나의 재현 가능한 프로젝트로 만들어 보는 것을 추천한다.
 
-> 전체 소스, 샘플 PCAP, Snort 경보, 실행 방법:  
+> 전체 소스, 샘플 PCAP, Snort 경보, 실행 방법:
 > [https://github.com/teriyakki-jin/network-forensics-lab](https://github.com/teriyakki-jin/network-forensics-lab)
