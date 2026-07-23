@@ -332,3 +332,4 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 
 - [실행 검증 결과](VERIFICATION.md)
 - [설계·트러블슈팅 Technical Case Study](docs/CASE_STUDY.md)
+- [Velog 게시용 기술 글](docs/VELOG_POST.md)
