@@ -4,16 +4,32 @@
 ![Kali Linux](https://img.shields.io/badge/Kali-Linux-557C94?logo=kalilinux&logoColor=white)
 ![Snort 3](https://img.shields.io/badge/Snort-3-EF3B2D)
 ![Elastic Stack](https://img.shields.io/badge/Elastic_Stack-9.4.2-005571?logo=elastic&logoColor=white)
+[![Validation](https://github.com/teriyakki-jin/network-forensics-lab/actions/workflows/validate.yml/badge.svg)](https://github.com/teriyakki-jin/network-forensics-lab/actions/workflows/validate.yml)
 
 Docker Desktop 위에 격리된 공격·피해 테스트망을 만들고, 패킷 수집부터 IDS 탐지와 시각화까지 한 번에 재현하는 네트워크 포렌식 실습 프로젝트입니다.
 
 > Kali → PCAP → Snort 3 → Logstash → Elasticsearch → Kibana
+
+**Portfolio focus:** Network Security · Digital Forensics · Detection Engineering · Data Pipeline · DevOps Automation
+
+[실행 화면](#실행-화면) · [아키텍처](#아키텍처) · [탐지 결과](#탐지-시나리오와-결과) · [빠른 시작](#빠른-시작) · [기술 사례](docs/CASE_STUDY.md)
 
 ## 실행 화면
 
 ![Kibana Discover에서 확인한 Snort 경보 30건](assets/kibana-discover.png)
 
 위 화면은 이 저장소의 테스트 트래픽을 직접 실행한 결과입니다. `snort-alerts-*` 데이터 뷰에서 30개의 IDS 경보와 원본 패킷 필드를 확인할 수 있습니다.
+
+## 핵심 성과
+
+| 재현성 | 탐지 | 무결성 | 가시성 | 품질 자동화 |
+|---|---|---|---|---|
+| **1개 명령**으로 전체 실행 | 커스텀 규칙 **3개** | PCAP **SHA-256** 검증 | Kibana 문서 **30건** | GitHub Actions **5종 검증** |
+
+- 공격 트래픽 생성부터 Kibana 데이터 뷰 구성까지 자동화했습니다.
+- 원본 PCAP 84패킷, Snort JSON 30행, Elasticsearch 30문서를 교차 검증했습니다.
+- 보안 경계를 코드로 표현했습니다: 격리망, localhost 바인딩, Snort 무네트워크 실행.
+- 실제 장애 원인을 분석하고 체크섬 오프로딩, WSL 저장소, Kibana 초기화 문제를 해결했습니다.
 
 ## 아키텍처
 
@@ -67,6 +83,26 @@ flowchart LR
 
 실습 PC의 부담을 줄이기 위해 JVM/Node 메모리를 Elasticsearch 1GB, Logstash 384MB, Kibana 768MB로 제한했습니다.
 
+## 설계 의사결정
+
+| 결정 | 선택 이유 | 트레이드오프 |
+|---|---|---|
+| Docker 격리망 | 외부 시스템에 테스트 트래픽이 전달되는 것을 방지 | 실제 라우팅 환경과 차이가 있음 |
+| Snort 오프라인 PCAP 분석 | 동일 증거로 규칙을 반복 검증 가능 | 실시간 차단 기능은 없음 |
+| ECS 유사 필드 변환 | IP·포트·규칙 기반 KQL 검색 단순화 | 완전한 ECS 호환은 추가 매핑 필요 |
+| 샘플 증거 버전 관리 | 실행 없이도 입력·결과·해시 검토 가능 | 대규모 PCAP에는 Git LFS 필요 |
+| 경량 CI와 로컬 통합 테스트 분리 | PR 검증 속도와 실제 스택 검증을 모두 확보 | CI에서는 전체 Elastic 실행을 생략 |
+
+## 문제 해결 하이라이트
+
+| 문제 | 원인 | 해결 |
+|---|---|---|
+| HTTP 규칙 미탐지 | Docker 가상 NIC 체크섬 오프로딩 | Snort 오프라인 분석에 `-k none` 적용 |
+| Docker 저장소 읽기 전용 전환 | 이미지 압축 해제 중 호스트 디스크 소진 | 공간 확보, WSL/Docker 복구, 재검증 |
+| Kibana UI 준비 지연 | 최초 플러그인 초기화와 saved object migration | `/api/status` 확인과 데이터 뷰 자동 구성 |
+
+자세한 판단 근거와 트러블슈팅 과정은 [Technical Case Study](docs/CASE_STUDY.md)에 정리했습니다.
+
 ## 빠른 시작
 
 ### 요구 사항
@@ -99,6 +135,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1
 5. PCAP SHA-256 기록
 6. Snort 3 오프라인 분석
 7. Elastic Stack 시작 및 문서 적재 확인
+8. Kibana 준비 상태 확인 및 `snort-alerts-*` 데이터 뷰 구성
 
 Elastic 이미지 다운로드를 미루고 PCAP과 Snort까지만 실행하려면 다음 옵션을 사용합니다.
 
@@ -109,9 +146,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1 -SkipE
 ## Kibana에서 분석하기
 
 1. [Kibana Discover](http://127.0.0.1:5601/app/discover)에 접속합니다.
-2. 데이터 뷰가 없다면 `snort-alerts-*`를 생성합니다.
-3. 시간 필드는 `@timestamp`를 선택합니다.
-4. 샘플 이벤트가 보이지 않으면 시간 범위를 `Last 2 hours` 이상으로 넓힙니다.
+2. `run-lab.ps1`이 생성한 `snort-alerts-*` 데이터 뷰를 선택합니다.
+3. 샘플 이벤트가 보이지 않으면 시간 범위를 `Last 2 hours` 이상으로 넓힙니다.
 
 유용한 KQL 예시:
 
@@ -178,6 +214,23 @@ Get-Content .\alerts\alert_json.txt |
     Select-Object Name, Count
 ```
 
+## 자동 검증
+
+GitHub Actions의 `Validation` 워크플로는 push와 pull request마다 다음을 확인합니다.
+
+- `docker compose config` 구성 유효성
+- Snort JSON 파싱 및 샘플 30행
+- PCAP SHA-256 무결성
+- Bash와 Node.js 구문
+- 모든 PowerShell 스크립트 구문
+
+로컬에서 동일한 핵심 검증을 빠르게 실행하려면:
+
+```powershell
+docker compose config --quiet
+node --check .\scripts\capture-kibana.mjs
+```
+
 ## 스크린샷 다시 만들기
 
 Kibana가 실행 중이고 데이터 뷰 `snort-alerts`가 존재할 때 다음 명령으로 README 이미지를 갱신할 수 있습니다.
@@ -199,6 +252,7 @@ node .\scripts\capture-kibana.mjs
 network-forensics-lab/
 ├─ alerts/                  # Snort JSON 경보
 ├─ assets/                  # README 스크린샷
+├─ docs/                    # 기술 사례와 설계 판단
 ├─ evidence/                # PCAP, 해시, nmap 결과
 ├─ kali/                    # Kali 분석 이미지
 ├─ logstash/pipeline/       # JSON → ECS 변환 파이프라인
@@ -266,4 +320,15 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 - 스캔 대상은 실습용 Nginx 컨테이너와 TCP 1~30번 포트로 제한됩니다.
 - 허가받지 않은 외부 시스템이나 운영망을 대상으로 사용하지 마십시오.
 
-상세 실행 검증은 [VERIFICATION.md](VERIFICATION.md)에서 확인할 수 있습니다.
+## 확장 로드맵
+
+- [ ] Brute force, DNS tunneling, web exploit 트래픽 추가
+- [ ] Suricata EVE JSON과 Snort 결과 비교
+- [ ] Kibana Lens 대시보드 자동 프로비저닝
+- [ ] MITRE ATT&CK technique 및 Sigma 규칙 매핑
+- [ ] 경량 PCAP 회귀 테스트를 CI에 추가
+
+## 더 읽기
+
+- [실행 검증 결과](VERIFICATION.md)
+- [설계·트러블슈팅 Technical Case Study](docs/CASE_STUDY.md)

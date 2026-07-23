@@ -1,0 +1,55 @@
+name: Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+      - name: Validate sample evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e -c . alerts/alert_json.txt >/dev/null
+          test "$(wc -l < alerts/alert_json.txt)" -eq 30
+          (cd evidence && sha256sum --check lab-traffic.pcap.sha256)
+
+      - name: Validate shell and Node scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n snort/run-snort.sh
+          node --check scripts/capture-kibana.mjs
+
+      - name: Validate PowerShell scripts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $parseErrors = @()
+          Get-ChildItem scripts -Filter '*.ps1' | ForEach-Object {
+              $tokens = $null
+              $errors = $null
+              [System.Management.Automation.Language.Parser]::ParseFile(
+                  $_.FullName,
+                  [ref]$tokens,
+                  [ref]$errors
+              ) | Out-Null
+              $parseErrors += $errors
+          }
+          if ($parseErrors.Count -gt 0) {
+              $parseErrors | Format-List
+              throw 'PowerShell syntax validation failed.'
+          }
