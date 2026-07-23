@@ -1,58 +1,122 @@
-# 격리형 네트워크 포렌식 실습망
+# Network Forensics Lab
 
-이 프로젝트는 Docker Desktop에서 다음 흐름을 재현합니다.
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Kali Linux](https://img.shields.io/badge/Kali-Linux-557C94?logo=kalilinux&logoColor=white)
+![Snort 3](https://img.shields.io/badge/Snort-3-EF3B2D)
+![Elastic Stack](https://img.shields.io/badge/Elastic_Stack-9.4.2-005571?logo=elastic&logoColor=white)
+
+Docker Desktop 위에 격리된 공격·피해 테스트망을 만들고, 패킷 수집부터 IDS 탐지와 시각화까지 한 번에 재현하는 네트워크 포렌식 실습 프로젝트입니다.
+
+> Kali → PCAP → Snort 3 → Logstash → Elasticsearch → Kibana
+
+## 실행 화면
+
+![Kibana Discover에서 확인한 Snort 경보 30건](assets/kibana-discover.png)
+
+위 화면은 이 저장소의 테스트 트래픽을 직접 실행한 결과입니다. `snort-alerts-*` 데이터 뷰에서 30개의 IDS 경보와 원본 패킷 필드를 확인할 수 있습니다.
+
+## 아키텍처
+
+```mermaid
+flowchart LR
+    subgraph LAB["격리 테스트망 · lab_net · 10.77.0.0/24"]
+        KALI["Kali Linux<br/>10.77.0.20"]
+        VICTIM["Nginx 피해 서버<br/>10.77.0.10"]
+        PCAP["tcpdump / tshark<br/>lab-traffic.pcap"]
+        KALI -->|"ICMP · HTTP probe · SYN scan"| VICTIM
+        KALI -->|"패킷 수집"| PCAP
+    end
+
+    PCAP -->|"오프라인 분석"| SNORT["Snort 3<br/>network_mode: none"]
+    SNORT --> JSON["JSON alerts"]
+
+    subgraph SOC["분석망 · soc_net"]
+        LOGSTASH["Logstash"] --> ES["Elasticsearch"] --> KIBANA["Kibana Discover"]
+    end
+
+    JSON --> LOGSTASH
+```
+
+`lab_net`은 Docker의 `internal: true` 네트워크입니다. 공격 트래픽은 컨테이너 내부의 고정 IP 사이에서만 생성됩니다. Snort는 네트워크 인터페이스에 직접 붙지 않고, 저장된 PCAP을 `network_mode: none` 상태에서 분석합니다.
+
+## 탐지 시나리오와 결과
+
+| 단계 | 생성 트래픽 | Snort SID | 탐지 결과 |
+|---|---|---:|---:|
+| 연결 확인 | ICMP Echo Request 3회 | `1000001` | 3건 |
+| 의심 경로 접근 | `GET /admin?cmd=id` | `1000002` | 1건 |
+| 제한형 포트 스캔 | TCP 1~30번 SYN 스캔 | `1000003` | 26건 |
+| **합계** |  |  | **30건** |
+
+수집된 PCAP은 84패킷, 6,778바이트이며 현재 샘플의 SHA-256은 다음과 같습니다.
 
 ```text
-Kali (10.77.0.20) -> Nginx 피해 서버 (10.77.0.10)
-       | PCAP 수집
-       v
-Snort 3 오프라인 탐지 -> JSON -> Logstash -> Elasticsearch -> Kibana
+504c3711f3244644293fc261d7424b3971dbddb2eb8402fcfe2ad1c57877bbdd
 ```
 
-`lab_net`은 `internal: true`인 격리 네트워크입니다. 테스트 트래픽은 ICMP, HTTP `/admin?cmd=id`, 제한된 1~30번 TCP 포트 SYN 스캔이며 이 실습망 밖으로 전송되지 않습니다.
+## 구성 요소
 
-Elastic JVM 메모리는 Docker Desktop 실습용으로 Elasticsearch 1GB, Logstash 384MB, Kibana 768MB로 제한되어 있습니다.
+| 구성 요소 | 역할 | 네트워크/포트 |
+|---|---|---|
+| Kali Linux | 트래픽 생성, `tcpdump`, `tshark`, `nmap` | `10.77.0.20` |
+| Nginx | 실습용 피해 서버 | `10.77.0.10:80` |
+| Snort 3 | PCAP 오프라인 IDS 분석 | 네트워크 없음 |
+| Logstash 9.4.2 | Snort JSON을 ECS 형태로 정규화 | `soc_net` |
+| Elasticsearch 9.4.2 | 경보 색인 및 검색 | `127.0.0.1:9200` |
+| Kibana 9.4.2 | Discover 기반 분석 UI | `127.0.0.1:5601` |
 
-## 실행
+실습 PC의 부담을 줄이기 위해 JVM/Node 메모리를 Elasticsearch 1GB, Logstash 384MB, Kibana 768MB로 제한했습니다.
 
-PowerShell에서 다음을 실행합니다.
+## 빠른 시작
+
+### 요구 사항
+
+- Windows 10/11 + WSL2
+- Docker Desktop과 Docker Compose
+- 최초 이미지 다운로드 및 압축 해제를 위한 충분한 디스크 여유 공간
+- PowerShell 5.1 이상
+
+### 저장소 받기
 
 ```powershell
-Set-Location 'C:\Users\USER\Documents\Codex\2026-07-23\new-chat\outputs\network-forensics-lab'
-powershell -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1
+Set-Location D:\develop
+git clone https://github.com/teriyakki-jin/network-forensics-lab.git
+Set-Location .\network-forensics-lab
 ```
 
-Elastic 이미지 다운로드를 뒤로 미루고 PCAP/Snort까지만 검증하려면:
+### 전체 파이프라인 실행
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1 -SkipElastic
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1
 ```
 
-## 생성 결과
+스크립트는 다음 작업을 자동으로 수행합니다.
 
-- `evidence/lab-traffic.pcap`: 원본 패킷
-- `evidence/lab-traffic.pcap.sha256`: SHA-256 해시
-- `evidence/nmap-result.txt`: 제한된 포트 스캔 결과
-- `alerts/alert_json.txt`: Snort JSON 경보
+1. Docker 엔진 확인
+2. Kali와 Nginx 격리망 시작
+3. `tcpdump` 패킷 캡처
+4. ICMP, HTTP probe, 제한형 SYN scan 생성
+5. PCAP SHA-256 기록
+6. Snort 3 오프라인 분석
+7. Elastic Stack 시작 및 문서 적재 확인
 
-Kali의 tshark로 PCAP을 확인할 수 있습니다.
+Elastic 이미지 다운로드를 미루고 PCAP과 Snort까지만 실행하려면 다음 옵션을 사용합니다.
 
 ```powershell
-docker compose exec kali tshark -r /evidence/lab-traffic.pcap -q -z conv,tcp
-docker compose exec kali tshark -r /evidence/lab-traffic.pcap -Y 'http.request' -V
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1 -SkipElastic
 ```
 
-## Kibana
+## Kibana에서 분석하기
 
-1. `http://127.0.0.1:5601` 접속
-2. Discover에서 Data View 생성
-3. 인덱스 패턴: `snort-alerts-*`
-4. 시간 필드: `@timestamp`
+1. [Kibana Discover](http://127.0.0.1:5601/app/discover)에 접속합니다.
+2. 데이터 뷰가 없다면 `snort-alerts-*`를 생성합니다.
+3. 시간 필드는 `@timestamp`를 선택합니다.
+4. 샘플 이벤트가 보이지 않으면 시간 범위를 `Last 2 hours` 이상으로 넓힙니다.
 
-KQL 예시:
+유용한 KQL 예시:
 
 ```text
-rule.id: "1000001"
+rule.id: 1000002
 ```
 
 ```text
@@ -63,25 +127,122 @@ source.ip: "10.77.0.20" and destination.ip: "10.77.0.10"
 rule.description: "LAB TCP SYN Scan"
 ```
 
-## 종료
-
-컨테이너만 종료하고 Elastic 데이터를 보존합니다.
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\stop-lab.ps1
+```text
+network.transport: "tcp" and destination.port <= 30
 ```
 
-Elastic 볼륨까지 삭제하려면 명시적으로 다음을 사용합니다.
+Elasticsearch에서 직접 적재 건수를 확인할 수도 있습니다.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\stop-lab.ps1 -DeleteElasticData
+Invoke-RestMethod http://127.0.0.1:9200/snort-alerts-*/_count
 ```
 
-이 구성의 인증 비활성화 설정은 로컬 격리 실습 전용입니다. 운영망에는 그대로 사용하지 마십시오.
+## Wireshark / tshark 분석
 
-## Docker Desktop 복구
+Wireshark에서 `evidence/lab-traffic.pcap`을 열고 다음 디스플레이 필터를 적용합니다.
 
-Elastic 기동 중 Docker Desktop이 비정상 종료된 뒤 `WSL/Service/CreateInstance/E_FAIL`이 발생하면 관리자 PowerShell에서 다음을 실행하거나 Windows를 재시작하십시오.
+```text
+icmp && ip.src == 10.77.0.20
+```
+
+```text
+http.request.uri contains "/admin"
+```
+
+```text
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+```
+
+컨테이너의 `tshark`로도 같은 증거를 확인할 수 있습니다.
+
+```powershell
+docker compose exec kali tshark -r /evidence/lab-traffic.pcap -q -z conv,tcp
+docker compose exec kali tshark -r /evidence/lab-traffic.pcap -Y 'http.request' -V
+docker compose exec kali tshark -r /evidence/lab-traffic.pcap -Y 'tcp.flags.syn == 1 && tcp.flags.ack == 0'
+```
+
+## 증거 무결성 확인
+
+```powershell
+$actual = (Get-FileHash .\evidence\lab-traffic.pcap -Algorithm SHA256).Hash.ToLowerInvariant()
+$expected = (Get-Content .\evidence\lab-traffic.pcap.sha256).Split(' ')[0]
+$actual -eq $expected
+```
+
+경보를 SID별로 집계하려면:
+
+```powershell
+Get-Content .\alerts\alert_json.txt |
+    ForEach-Object { $_ | ConvertFrom-Json } |
+    Group-Object sid |
+    Select-Object Name, Count
+```
+
+## 스크린샷 다시 만들기
+
+Kibana가 실행 중이고 데이터 뷰 `snort-alerts`가 존재할 때 다음 명령으로 README 이미지를 갱신할 수 있습니다.
+
+```powershell
+node .\scripts\capture-kibana.mjs
+```
+
+기본 Chrome 경로가 다르면 `CHROME_PATH` 환경 변수로 지정합니다.
+
+```powershell
+$env:CHROME_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node .\scripts\capture-kibana.mjs
+```
+
+## 디렉터리 구조
+
+```text
+network-forensics-lab/
+├─ alerts/                  # Snort JSON 경보
+├─ assets/                  # README 스크린샷
+├─ evidence/                # PCAP, 해시, nmap 결과
+├─ kali/                    # Kali 분석 이미지
+├─ logstash/pipeline/       # JSON → ECS 변환 파이프라인
+├─ scripts/                 # 실행, 종료, 화면 캡처 자동화
+├─ snort/                   # Snort 로컬 규칙과 실행기
+├─ compose.yaml
+├─ README.md
+└─ VERIFICATION.md
+```
+
+## 운영 명령
+
+현재 상태 확인:
+
+```powershell
+docker compose ps
+docker compose logs --tail 100 logstash kibana
+```
+
+컨테이너만 종료하고 Elastic 데이터를 보존:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-lab.ps1
+```
+
+Elastic 볼륨까지 삭제:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-lab.ps1 -DeleteElasticData
+```
+
+`-DeleteElasticData`는 기존 Elasticsearch 인덱스와 Logstash 처리 상태를 함께 삭제합니다.
+
+## 문제 해결
+
+### Kibana에 데이터가 보이지 않음
+
+- 시간 범위를 `Last 2 hours` 이상으로 변경합니다.
+- `Invoke-RestMethod http://127.0.0.1:9200/snort-alerts-*/_count`로 적재 여부를 확인합니다.
+- `docker compose logs logstash`에서 파이프라인 오류를 확인합니다.
+
+### Docker Desktop / WSL 오류
+
+관리자 PowerShell에서 다음 명령을 실행하거나 Windows를 재시작합니다.
 
 ```powershell
 wsl --shutdown
@@ -89,4 +250,20 @@ Restart-Service WslService -Force
 Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 ```
 
-Docker가 준비되면 `scripts/run-lab.ps1`을 다시 실행합니다. 내려받은 이미지와 Docker 볼륨은 삭제하지 않는 한 유지됩니다.
+### `read-only file system` 오류
+
+호스트 드라이브의 여유 공간을 확인합니다. Docker 이미지 압축 해제 중 공간이 소진되면 WSL의 Docker 저장소가 읽기 전용으로 전환될 수 있습니다.
+
+```powershell
+[System.IO.DriveInfo]::new('C').AvailableFreeSpace / 1GB
+```
+
+## 보안 범위와 제한사항
+
+- 이 프로젝트는 **로컬 격리 실습 전용**입니다.
+- Elasticsearch/Kibana 인증은 편의를 위해 비활성화되어 있으며 포트는 localhost에만 바인딩됩니다.
+- Snort는 인라인 차단 장비가 아니라 저장된 PCAP을 분석하는 오프라인 IDS로 동작합니다.
+- 스캔 대상은 실습용 Nginx 컨테이너와 TCP 1~30번 포트로 제한됩니다.
+- 허가받지 않은 외부 시스템이나 운영망을 대상으로 사용하지 마십시오.
+
+상세 실행 검증은 [VERIFICATION.md](VERIFICATION.md)에서 확인할 수 있습니다.

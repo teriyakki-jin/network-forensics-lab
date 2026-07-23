@@ -13,3 +13,9 @@ evidence/*.pcap
 data/
 docker-data/
 *.pid
+
+# Local browser profiles used for README screenshots
+.chrome-profile/
+.edge-profile/
+.capture-profile*/
+.capture-debug/
