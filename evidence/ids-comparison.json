@@ -1,0 +1,87 @@
+{
+  "scenarios": [
+    {
+      "attack": {
+        "tactic": "Credential Access",
+        "technique_id": "T1110",
+        "technique_name": "Brute Force"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "brute_force",
+      "snort_alerts": 1,
+      "suricata_alerts": 1,
+      "title": "LAB HTTP Basic Auth Brute Force"
+    },
+    {
+      "attack": {
+        "tactic": "Command and Control",
+        "technique_id": "T1071.004",
+        "technique_name": "DNS"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "dns_tunneling",
+      "snort_alerts": 5,
+      "suricata_alerts": 5,
+      "title": "LAB DNS Tunneling Pattern"
+    },
+    {
+      "attack": {
+        "tactic": "Initial Access",
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "http_admin_probe",
+      "snort_alerts": 1,
+      "suricata_alerts": 1,
+      "title": "LAB HTTP Admin Command Probe"
+    },
+    {
+      "attack": {
+        "tactic": "Discovery",
+        "technique_id": "T1018",
+        "technique_name": "Remote System Discovery"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "icmp_echo",
+      "snort_alerts": 4,
+      "suricata_alerts": 4,
+      "title": "LAB ICMP Echo Request"
+    },
+    {
+      "attack": {
+        "tactic": "Discovery",
+        "technique_id": "T1046",
+        "technique_name": "Network Service Discovery"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "tcp_syn_scan",
+      "snort_alerts": 33,
+      "suricata_alerts": 33,
+      "title": "LAB TCP SYN Scan"
+    },
+    {
+      "attack": {
+        "tactic": "Initial Access",
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "web_exploit",
+      "snort_alerts": 1,
+      "suricata_alerts": 1,
+      "title": "LAB SQL Injection Probe"
+    }
+  ],
+  "schema_version": 1,
+  "totals": {
+    "snort": 45,
+    "suricata": 45
+  }
+}

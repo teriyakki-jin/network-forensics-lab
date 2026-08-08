@@ -7,6 +7,19 @@ services:
     networks:
       lab_net:
         ipv4_address: 10.77.0.10
+    volumes:
+      - ./victim/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+  dns:
+    image: coredns/coredns:1.12.4
+    container_name: nf-dns
+    command: ["-conf", "/etc/coredns/Corefile"]
+    volumes:
+      - ./dns/Corefile:/etc/coredns/Corefile:ro
+    networks:
+      lab_net:
+        ipv4_address: 10.77.0.53
     restart: unless-stopped
 
   kali:
@@ -19,19 +32,33 @@ services:
       - NET_RAW
     volumes:
       - ./evidence:/evidence
+      - ./kali/generate-traffic.sh:/lab/generate-traffic.sh:ro
     networks:
       lab_net:
         ipv4_address: 10.77.0.20
+    depends_on:
+      - victim
+      - dns
     restart: unless-stopped
 
   snort:
-    image: ciscotalos/snort3:latest
+    image: ciscotalos/snort3@sha256:f15f714fd61ade114b1039687dd43352cae26cd6401b89f2b03404e0d21e322f
     profiles: ["tools"]
     entrypoint: ["/bin/sh", "/rules/run-snort.sh"]
     volumes:
       - ./evidence:/evidence:ro
       - ./alerts:/alerts
       - ./snort:/rules:ro
+    network_mode: none
+
+  suricata:
+    image: jasonish/suricata:8.0.6@sha256:4f51f6e6ab355cfb6288a2186b0a2e884618c0a45d0fe140023293441fc2176a
+    profiles: ["tools"]
+    entrypoint: ["/bin/sh", "/rules/run-suricata.sh"]
+    volumes:
+      - ./evidence:/evidence:ro
+      - ./alerts:/alerts
+      - ./suricata:/rules:ro
     network_mode: none
 
   elasticsearch:

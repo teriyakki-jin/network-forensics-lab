@@ -10,28 +10,55 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
 
       - name: Validate Docker Compose
-        run: docker compose config --quiet
+        run: docker compose --profile tools config --quiet
+
+      - name: Run unit and repository contract tests
+        run: |
+          python -m coverage run --branch -m unittest discover -s tests -v
+          python -m coverage report --fail-under=80
 
       - name: Validate sample evidence
         shell: bash
         run: |
           set -euo pipefail
           jq -e -c . alerts/alert_json.txt >/dev/null
-          test "$(wc -l < alerts/alert_json.txt)" -eq 30
           (cd evidence && sha256sum --check lab-traffic.pcap.sha256)
+
+      - name: verify-fixture
+        run: |
+          python -m forensics.cli verify-fixture \
+            --pcap evidence/lab-traffic.pcap \
+            --checksum evidence/lab-traffic.pcap.sha256
+
+      - name: validate-sigma
+        run: python -m forensics.cli validate-sigma --directory detection/sigma
+
+      - name: Run offline IDS PCAP regression
+        shell: pwsh
+        run: |
+          docker compose --profile tools run --rm snort
+          docker compose --profile tools run --rm suricata
+          ./scripts/run-comparison.ps1
 
       - name: Validate shell and Node scripts
         shell: bash
         run: |
           set -euo pipefail
+          bash -n kali/generate-traffic.sh
           bash -n snort/run-snort.sh
+          bash -n suricata/run-suricata.sh
           node --check scripts/capture-kibana.mjs
 
       - name: Validate PowerShell scripts
@@ -51,5 +78,9 @@ jobs:
           }
           if ($parseErrors.Count -gt 0) {
               $parseErrors | Format-List
-              throw 'PowerShell syntax validation failed.'
+            throw 'PowerShell syntax validation failed.'
           }
+
+      - name: Stop regression containers
+        if: always()
+        run: docker compose --profile tools down --remove-orphans

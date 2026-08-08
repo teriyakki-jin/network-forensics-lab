@@ -1,0 +1,18 @@
+title: LAB TCP SYN Scan
+id: 28767bbc-81c2-4775-8d84-f4bad351d620
+status: test
+description: Detects the bounded TCP SYN discovery scan in the lab fixture.
+author: teriyakki-jin
+date: 2026-08-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000003'
+  condition: selection
+falsepositives:
+  - Approved vulnerability scanner
+level: medium
+tags:
+  - attack.discovery
+  - attack.t1046
