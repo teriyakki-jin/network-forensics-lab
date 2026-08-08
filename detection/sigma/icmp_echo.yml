@@ -1,0 +1,18 @@
+title: LAB ICMP Echo Request
+id: d6b01484-9457-4206-9816-29885421a5e4
+status: test
+description: Detects the lab ICMP discovery scenario after IDS normalisation.
+author: teriyakki-jin
+date: 2026-08-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000001'
+  condition: selection
+falsepositives:
+  - Expected administrative ping outside the isolated lab
+level: low
+tags:
+  - attack.discovery
+  - attack.t1018

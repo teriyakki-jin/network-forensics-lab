@@ -1,0 +1,18 @@
+title: LAB HTTP Admin Command Probe
+id: c2953b3d-d5e5-4195-bc12-a306e972e221
+status: test
+description: Detects a command-like query sent to the lab admin path.
+author: teriyakki-jin
+date: 2026-08-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000002'
+  condition: selection
+falsepositives:
+  - Approved security testing in the isolated lab
+level: medium
+tags:
+  - attack.initial-access
+  - attack.t1190

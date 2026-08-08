@@ -1,0 +1,18 @@
+title: LAB DNS Tunneling Pattern
+id: 27c7de28-a3dc-4e1d-9ea2-aae18812a7be
+status: test
+description: Detects high-entropy lab labels beneath the reserved exfil.lab domain.
+author: teriyakki-jin
+date: 2026-08-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000005'
+  condition: selection
+falsepositives:
+  - Approved DNS security test using the reserved lab suffix
+level: high
+tags:
+  - attack.command-and-control
+  - attack.t1071.004

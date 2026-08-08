@@ -1,0 +1,60 @@
+{
+  "rules": [
+    {
+      "id": "27c7de28-a3dc-4e1d-9ea2-aae18812a7be",
+      "level": "high",
+      "path": "dns_tunneling.yml",
+      "techniques": [
+        "T1071.004"
+      ],
+      "title": "LAB DNS Tunneling Pattern"
+    },
+    {
+      "id": "c2953b3d-d5e5-4195-bc12-a306e972e221",
+      "level": "medium",
+      "path": "http_admin_probe.yml",
+      "techniques": [
+        "T1190"
+      ],
+      "title": "LAB HTTP Admin Command Probe"
+    },
+    {
+      "id": "147c1849-e978-4389-bbe0-99991f430da3",
+      "level": "high",
+      "path": "http_brute_force.yml",
+      "techniques": [
+        "T1110"
+      ],
+      "title": "LAB HTTP Basic Auth Brute Force"
+    },
+    {
+      "id": "d6b01484-9457-4206-9816-29885421a5e4",
+      "level": "low",
+      "path": "icmp_echo.yml",
+      "techniques": [
+        "T1018"
+      ],
+      "title": "LAB ICMP Echo Request"
+    },
+    {
+      "id": "28767bbc-81c2-4775-8d84-f4bad351d620",
+      "level": "medium",
+      "path": "tcp_syn_scan.yml",
+      "techniques": [
+        "T1046"
+      ],
+      "title": "LAB TCP SYN Scan"
+    },
+    {
+      "id": "5f56da56-e26d-43dd-a7c1-938443299639",
+      "level": "high",
+      "path": "web_exploit.yml",
+      "techniques": [
+        "T1190"
+      ],
+      "title": "LAB SQL Injection Probe"
+    }
+  ],
+  "schema_version": 1,
+  "valid_rules": 6
+}

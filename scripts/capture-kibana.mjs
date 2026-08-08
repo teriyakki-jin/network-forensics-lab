@@ -3,15 +3,15 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
-const output = path.join(root, 'assets', 'kibana-discover.png');
+const output = path.join(root, 'assets', 'kibana-lens-dashboard.png');
 const profile = path.join(root, `.capture-profile-${process.pid}`);
 const chrome = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const externalPort = process.env.CHROME_DEBUG_PORT
   ? Number(process.env.CHROME_DEBUG_PORT)
   : null;
 let port = externalPort;
-const discoverUrl =
-  "http://127.0.0.1:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-2h,to:now))&_a=(columns:!(_source),dataSource:(dataViewId:snort-alerts,type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))";
+const dashboardUrl =
+  'http://127.0.0.1:5601/app/dashboards#/view/network-forensics-overview?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-2h,to:now))';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -59,7 +59,7 @@ async function capture() {
           '--no-default-browser-check',
           '--remote-debugging-port=0',
           `--user-data-dir=${profile}`,
-          '--window-size=1600,1000',
+          '--window-size=1600,1200',
           'about:blank',
         ],
         { stdio: 'ignore', windowsHide: true },
@@ -101,22 +101,32 @@ async function capture() {
     await command('Runtime.enable');
     await command('Emulation.setDeviceMetricsOverride', {
       width: 1600,
-      height: 1000,
+      height: 1200,
       deviceScaleFactor: 1,
       mobile: false,
     });
-    await command('Page.navigate', { url: discoverUrl });
-    console.log('Waiting for Kibana Discover');
+    await command('Page.navigate', { url: dashboardUrl });
+    console.log('Waiting for the Kibana Lens dashboard');
 
     for (let attempt = 0; attempt < 45; attempt += 1) {
       await delay(1000);
       const result = await command('Runtime.evaluate', {
-        expression: "document.readyState === 'complete' && document.body.innerText.includes('Discover')",
+        expression:
+          "document.readyState === 'complete' && document.body.innerText.includes('Network Forensics Lab')",
         returnByValue: true,
       });
       if (result.result?.value) break;
     }
-    await delay(8000);
+    for (let attempt = 0; attempt < 45; attempt += 1) {
+      await delay(1000);
+      const result = await command('Runtime.evaluate', {
+        expression:
+          "document.body.innerText.includes('Unique count of scenario.keyword') && !document.querySelector('[data-test-subj=embeddablePanelLoading]')",
+        returnByValue: true,
+      });
+      if (result.result?.value) break;
+    }
+    await delay(5000);
     await command('Runtime.evaluate', {
       expression:
         "[...document.querySelectorAll('button')].filter((button) => button.innerText.trim() === 'Dismiss').forEach((button) => button.click())",

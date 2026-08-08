@@ -4,6 +4,9 @@
 .vscode/
 *.log
 *.tmp
+.coverage
+__pycache__/
+*.py[cod]
 
 # Packet captures generated outside the committed sample
 evidence/*.pcap

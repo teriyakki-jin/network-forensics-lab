@@ -1,0 +1,18 @@
+title: LAB HTTP Basic Auth Brute Force
+id: 147c1849-e978-4389-bbe0-99991f430da3
+status: test
+description: Detects repeated invalid HTTP Basic authentication attempts in the lab.
+author: teriyakki-jin
+date: 2026-08-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000004'
+  condition: selection
+falsepositives:
+  - Approved authentication regression test
+level: high
+tags:
+  - attack.credential-access
+  - attack.t1110

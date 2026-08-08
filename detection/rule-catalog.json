@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "scenario": "icmp_echo",
+      "title": "LAB ICMP Echo Request",
+      "snort_sid": 1000001,
+      "suricata_sid": 1000001,
+      "attack": {
+        "tactic": "Discovery",
+        "technique_id": "T1018",
+        "technique_name": "Remote System Discovery"
+      }
+    },
+    {
+      "scenario": "http_admin_probe",
+      "title": "LAB HTTP Admin Command Probe",
+      "snort_sid": 1000002,
+      "suricata_sid": 1000002,
+      "attack": {
+        "tactic": "Initial Access",
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application"
+      }
+    },
+    {
+      "scenario": "tcp_syn_scan",
+      "title": "LAB TCP SYN Scan",
+      "snort_sid": 1000003,
+      "suricata_sid": 1000003,
+      "attack": {
+        "tactic": "Discovery",
+        "technique_id": "T1046",
+        "technique_name": "Network Service Discovery"
+      }
+    },
+    {
+      "scenario": "brute_force",
+      "title": "LAB HTTP Basic Auth Brute Force",
+      "snort_sid": 1000004,
+      "suricata_sid": 1000004,
+      "attack": {
+        "tactic": "Credential Access",
+        "technique_id": "T1110",
+        "technique_name": "Brute Force"
+      }
+    },
+    {
+      "scenario": "dns_tunneling",
+      "title": "LAB DNS Tunneling Pattern",
+      "snort_sid": 1000005,
+      "suricata_sid": 1000005,
+      "attack": {
+        "tactic": "Command and Control",
+        "technique_id": "T1071.004",
+        "technique_name": "DNS"
+      }
+    },
+    {
+      "scenario": "web_exploit",
+      "title": "LAB SQL Injection Probe",
+      "snort_sid": 1000006,
+      "suricata_sid": 1000006,
+      "attack": {
+        "tactic": "Initial Access",
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application"
+      }
+    }
+  ]
+}

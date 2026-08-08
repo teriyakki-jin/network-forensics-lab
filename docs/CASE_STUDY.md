@@ -1,116 +1,174 @@
 # Technical Case Study
 
-## 1. 프로젝트 배경
+## 1. 문제 정의
 
-네트워크 보안 도구를 각각 설치하는 것만으로는 패킷이 어떤 과정을 거쳐 탐지 이벤트와 검색 가능한 데이터로 바뀌는지 설명하기 어렵습니다. 이 프로젝트는 공격 트래픽 생성, 증거 보존, IDS 탐지, 데이터 정규화, 검색·시각화를 하나의 재현 가능한 흐름으로 연결하기 위해 만들었습니다.
+네트워크 보안 도구를 각각 설치하는 것만으로는 “같은 패킷이 서로 다른 IDS에서 어떻게 탐지되고, 그 결과를 어떻게 신뢰할 수 있는가”를 설명하기 어렵습니다. 이 프로젝트의 목표는 공격 트래픽 생성, 증거 보존, 다중 IDS 탐지, 표준 매핑, 검색·시각화를 하나의 반복 가능한 흐름으로 연결하는 것이었습니다.
 
 핵심 질문은 다음과 같습니다.
 
-- 공격자와 피해 서버를 외부망에서 격리할 수 있는가?
-- 원본 PCAP과 탐지 결과의 무결성을 함께 증명할 수 있는가?
-- Snort 고유 JSON을 검색하기 쉬운 공통 필드로 정규화할 수 있는가?
-- 다른 개발자도 한 번의 명령으로 같은 결과를 재현할 수 있는가?
+- 실습 트래픽을 외부망과 확실히 분리할 수 있는가?
+- 같은 PCAP에 대한 Snort와 Suricata 결과를 동일 기준으로 비교할 수 있는가?
+- 원본 PCAP과 파생 증거가 서로 일치함을 자동 검증할 수 있는가?
+- ATT&CK, Sigma, Kibana를 코드로 재생성할 수 있는가?
+- 새 규칙이 기존 시나리오를 깨뜨리면 PR 단계에서 잡을 수 있는가?
 
-## 2. 구현 범위
+## 2. 최종 구현 범위
 
-| 영역 | 구현 내용 |
+| 영역 | 구현 |
 |---|---|
-| 네트워크 | 고정 IP를 사용하는 Docker 격리망 `10.77.0.0/24` |
-| 트래픽 | ICMP, HTTP 관리 경로 probe, 제한형 SYN scan |
-| 수집 | Kali의 `tcpdump`로 PCAP 생성, `tshark`로 분석 |
-| 탐지 | Snort 3 커스텀 규칙 3개와 오프라인 PCAP 분석 |
-| 파이프라인 | Logstash를 통한 Snort JSON → ECS 유사 필드 변환 |
-| 저장/검색 | 일자별 Elasticsearch 인덱스와 Kibana 데이터 뷰 |
-| 자동화 | PowerShell 실행·종료·Kibana 설정, Node 화면 캡처 |
-| 품질 | GitHub Actions에서 Compose, JSON, 해시, 스크립트 구문 검증 |
+| 격리망 | Docker `internal: true`, `10.77.0.0/24`, 고정 IP |
+| 테스트 트래픽 | ICMP, admin probe, SYN scan, brute force, DNS tunneling pattern, SQLi probe |
+| 증거 수집 | Kali `tcpdump`, PCAP SHA-256, binary header 검사 |
+| 탐지 | Snort 3·Suricata 8 동일 PCAP 오프라인 분석 |
+| 정규화 | Python 공통 이벤트 스키마, 민감 인증 원문 제외 |
+| 표준 매핑 | MITRE ATT&CK catalog, 시나리오별 Sigma 규칙 |
+| 분석 | Logstash, Elasticsearch, Kibana Lens dashboard as code |
+| 자동화 | 1-command PowerShell runner, GitHub Actions PCAP regression |
 
-## 3. 주요 설계 의사결정
+## 3. 보안 경계
 
-### 트래픽 생성망과 분석망 분리
+### 공격망
 
-`lab_net`은 `internal: true`로 구성해 테스트 트래픽이 외부로 라우팅되지 않도록 했습니다. Elastic Stack은 별도의 `soc_net`에 배치하고, Kibana와 Elasticsearch 포트는 `127.0.0.1`에만 게시했습니다.
+Kali, Nginx victim, CoreDNS는 외부 라우팅이 없는 `lab_net`에서만 통신합니다. 공격 시나리오는 `10.77.0.10`과 `10.77.0.53`만 대상으로 삼습니다.
 
-이 구조는 공격 재현 영역과 분석 영역의 책임을 분리하며, 로컬 실습의 오용 가능성을 낮춥니다.
+### 분석 경계
 
-### Snort 오프라인 분석
+Snort와 Suricata는 `network_mode: none`으로 실행됩니다. 두 엔진은 캡처가 끝난 PCAP만 읽으므로 분석 단계에서 외부 네트워크 접근이 필요하지 않습니다.
 
-Snort를 인라인 센서로 연결하는 대신 저장된 PCAP을 분석하도록 구성했습니다. 동일한 증거 파일을 반복 분석할 수 있어 규칙 변경 전후 결과 비교와 디버깅이 쉬워집니다. 또한 Snort 컨테이너는 `network_mode: none`으로 실행해 분석 중 외부 통신을 차단했습니다.
+### 관리 인터페이스
 
-### 증거와 이벤트를 함께 버전 관리
+Elasticsearch와 Kibana 포트는 `127.0.0.1`에만 바인딩합니다. 인증을 비활성화한 로컬 랩이므로 외부 인터페이스 노출을 허용하지 않습니다.
 
-PCAP, SHA-256, nmap 결과, Snort JSON을 작은 샘플 증거 세트로 저장했습니다. 포트폴리오 검토자는 전체 스택을 실행하지 않아도 실제 입력과 결과를 확인할 수 있습니다.
+## 4. 탐지 모델
 
-### ECS 유사 필드 정규화
+`detection/rule-catalog.json`을 규칙 메타데이터의 단일 기준으로 사용합니다.
 
-Logstash에서 `src_addr`, `dst_addr`, `sid`, `msg` 같은 Snort 필드를 다음 구조로 변환했습니다.
+```text
+scenario
+  ├─ Snort SID
+  ├─ Suricata SID
+  ├─ title
+  └─ ATT&CK tactic / technique
+```
 
-| Snort | 정규화 필드 |
-|---|---|
-| `src_addr` | `source.ip` |
-| `dst_addr` | `destination.ip` |
-| `src_port` / `dst_port` | `source.port` / `destination.port` |
-| `proto` | `network.transport` |
-| `sid` | `rule.id` |
-| `msg` | `rule.description` |
-| `priority` | `event.severity` |
+Python 정규화기는 엔진별 원본을 다음 공통 필드로 변환합니다.
 
-이 변환으로 Kibana KQL에서 IP, 포트, 규칙, 프로토콜을 일관된 방식으로 검색할 수 있습니다.
+```text
+@timestamp
+engine
+scenario
+source.ip / source.port
+destination.ip / destination.port
+network.transport
+rule.id / rule.description
+threat.tactic.name
+threat.technique.id / threat.technique.name
+```
 
-## 4. 트러블슈팅 사례
+HTTP Basic 인증 원문처럼 자격 증명이 포함될 수 있는 payload는 정규화 증거에 복사하지 않습니다.
 
-### Docker 가상 NIC 체크섬 오프로딩
+## 5. 실제 검증 결과
 
-초기 Snort 분석에서 HTTP payload 규칙이 예상대로 발생하지 않았습니다. Docker 가상 NIC에서 캡처한 패킷의 체크섬 상태가 원인이었고, 오프라인 분석 명령에 `-k none`을 적용해 Snort가 캡처 파일의 체크섬 오류를 무시하도록 해결했습니다.
+현재 커밋 fixture 결과:
 
-### WSL 저장소의 읽기 전용 전환
-
-Elastic 이미지 압축 해제 중 호스트 드라이브 여유 공간이 0이 되면서 Docker 저장소가 `read-only file system` 상태로 전환됐습니다. 호스트 디스크 공간을 확보하고 WSL/Docker를 재시작한 뒤 이미지 계층을 다시 받아 복구했습니다.
-
-이 경험을 README의 장애 대응 절차와 디스크 사전 요구 사항에 반영했습니다.
-
-### Kibana 최초 실행 시간
-
-Kibana 9의 최초 플러그인 초기화와 saved object migration은 Elasticsearch 적재 완료보다 오래 걸렸습니다. 단순 포트 오픈 대신 `/api/status`의 `available` 상태를 확인하도록 `setup-kibana.ps1`을 구현했고, 데이터 뷰 생성까지 자동화했습니다.
-
-## 5. 검증 결과
-
-| 지표 | 결과 |
+| 항목 | 결과 |
 |---|---:|
-| PCAP 패킷 | 84 |
-| PCAP 크기 | 6,778 bytes |
-| Snort 규칙 | 3 |
-| Snort 경보 | 30 |
-| Elasticsearch 문서 | 30 |
-| PCAP SHA-256 검증 | 일치 |
-| Kibana 상태 | available |
+| PCAP packets | 159 |
+| PCAP bytes | 16,025 |
+| Snort alerts | 45 |
+| Suricata alerts | 45 |
+| 양쪽 엔진에서 탐지된 시나리오 | 6 / 6 |
+| 시나리오별 alert delta | 모두 0 |
+| Sigma rules | 6 valid |
+| Python tests | 23 passed |
+| 전체 coverage | 91% |
 
-탐지 분포는 ICMP 3건, HTTP probe 1건, SYN scan 26건입니다. 원본 JSON 30개 행과 Elasticsearch 문서 30건이 일치해 수집부터 적재까지 이벤트 손실이 없음을 확인했습니다.
+이 결과는 로컬 회귀 fixture에 한정됩니다. 운영망 전체의 탐지율이나 오탐률로 일반화하지 않습니다.
 
-## 6. 품질과 재현성
+## 6. 해결한 통합 장애
 
-GitHub Actions는 전체 Elastic 이미지를 실행하지 않고도 다음 항목을 빠르게 검증합니다.
+### Elasticsearch 시작 경합
 
-- Docker Compose 구성 유효성
-- Snort JSON 30개 행 파싱
-- PCAP SHA-256 일치
-- Bash, Node.js, PowerShell 스크립트 구문
+`docker compose up -d`는 컨테이너 프로세스가 시작됐음을 의미할 뿐 REST API 준비를 보장하지 않았습니다. 최초 실행에서 인덱스 삭제 요청이 JVM 부팅보다 먼저 도착해 연결이 닫혔습니다.
 
-로컬 통합 검증은 `scripts/run-lab.ps1`이 담당합니다. 실행이 끝나면 Elasticsearch 문서 수와 Kibana 준비 상태까지 확인합니다.
+해결:
 
-## 7. 한계와 확장 방향
+- `/_cluster/health?wait_for_status=yellow`를 반복 확인
+- 제한 시간 내 준비되지 않으면 명시적 실패
+- 준비 확인 이후에만 인덱스 작업 수행
 
-- 현재 Snort는 오프라인 IDS이며 인라인 차단은 수행하지 않습니다.
-- 트래픽은 고정된 소규모 시나리오이므로 정상·악성 데이터 다양성이 제한적입니다.
-- 인증을 비활성화한 로컬 실습 설정이므로 운영 환경에는 TLS, 계정, secret 관리가 필요합니다.
+### Elasticsearch 9 wildcard 삭제 차단
 
-확장 우선순위는 다음과 같습니다.
+Elasticsearch 9의 안전 설정은 `DELETE /ids-alerts-*`를 거부했습니다.
 
-1. Brute force, DNS tunneling, web exploit 시나리오 추가
-2. Suricata EVE JSON과 Snort 결과 비교
-3. Kibana Lens 기반 탐지 분포 대시보드 자동 생성
-4. Sigma 규칙 또는 ATT&CK technique 매핑
-5. CI에서 경량 PCAP 회귀 테스트 수행
+해결:
 
-## 8. 인터뷰용 요약
+- `_cat/indices/ids-alerts-*`로 후보 조회
+- `ids-alerts-*` 접두사 재검증
+- URL encoding한 정확한 인덱스 이름만 개별 삭제
 
-> Docker 격리망에서 Kali 공격 트래픽을 생성하고 PCAP을 보존한 뒤, Snort 3 커스텀 규칙으로 탐지해 Logstash와 Elasticsearch로 정규화·적재하고 Kibana에서 분석하는 재현 가능한 포렌식 파이프라인을 구축했습니다. PCAP 해시, JSON 행 수, Elasticsearch 문서 수를 교차 검증했으며 Docker 체크섬 오프로딩과 WSL 디스크 장애도 직접 진단해 자동화와 운영 문서에 반영했습니다.
+이 방식은 편리한 wildcard 삭제보다 범위가 명확하고 안전합니다.
+
+### Kibana 초기화와 dashboard drift
+
+Kibana는 최초 실행 때 플러그인과 saved object migration에 시간이 필요합니다. 수동으로 만든 화면은 다른 환경에서 재현되지 않았습니다.
+
+해결:
+
+- `/api/status`의 `available` 상태 대기
+- 데이터 뷰를 고정 ID `ids-alerts`로 생성
+- 공식 Dashboards API에 고정 ID `network-forensics-overview`로 upsert
+- metric, pie, data table Lens 패널을 코드로 선언
+- Headless Chrome으로 실제 렌더링을 확인한 후 README screenshot 생성
+
+### 변동 가능한 PCAP과 취약한 테스트
+
+초기 CLI 테스트는 패킷 수 `84`를 하드코딩했습니다. 새 시나리오를 추가해 PCAP을 다시 만들자 정상 변경인데도 테스트가 실패했습니다.
+
+해결:
+
+- 특정 패킷 수 대신 `packets > 0` 검증
+- PCAP parser가 계산한 파일 크기와 hash 검증기의 byte 수 일치 확인
+- 상세 수치는 생성된 evidence JSON에서 기록
+
+## 7. TDD와 품질 게이트
+
+구현은 다음 RED → GREEN 순서로 진행했습니다.
+
+1. 공통 이벤트와 비교 결과에 대한 단위 테스트
+2. CLI fixture, Sigma 검증 테스트
+3. Compose 격리, 이미지 고정, rule coverage 계약 테스트
+4. Elasticsearch readiness와 정확한 index delete 계약 테스트
+5. Kibana Lens dashboard/capture 계약 테스트
+
+GitHub Actions는 실제 Snort·Suricata 컨테이너를 실행해 커밋된 PCAP을 다시 분석합니다. Python 테스트만 통과하고 IDS 규칙이 깨지는 상황을 막기 위한 회귀 게이트입니다.
+
+## 8. 포트폴리오 관점의 차별성
+
+이 프로젝트의 핵심은 도구 수가 아니라 증거의 연결성입니다.
+
+```text
+Threat fixture
+  → immutable PCAP check
+  → two IDS engines
+  → normalized events
+  → ATT&CK + Sigma
+  → Elastic evidence
+  → CI regression
+```
+
+따라서 “Snort를 설치했다”보다 다음 역량을 보여 줍니다.
+
+- 안전한 테스트 경계 설계
+- 엔진별 데이터 모델 통합
+- 디지털 증거 무결성 검증
+- detection-as-code와 dashboard-as-code
+- 실패 조건을 자동화 계약으로 전환하는 디버깅
+
+## 9. 한계와 다음 연구 주제
+
+- 소규모 합성 fixture이므로 실제망 FPR·recall·처리량을 측정하지 않습니다.
+- 암호화 트래픽 복호화와 TLS inspection은 범위 밖입니다.
+- IDS는 오프라인 탐지이며 IPS 차단을 수행하지 않습니다.
+- 다음 확장 시 실제 공개 PCAP corpus와 benign baseline을 분리해 precision/recall을 측정할 수 있습니다.
+- 대규모 evidence는 Git LFS 또는 object storage와 chain-of-custody metadata가 필요합니다.

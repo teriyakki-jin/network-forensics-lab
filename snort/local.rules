@@ -3,3 +3,9 @@ alert icmp any any -> 10.77.0.10 any (msg:"LAB ICMP Echo Request"; itype:8; sid:
 alert tcp any any -> 10.77.0.10 80 (msg:"LAB HTTP Admin Command Probe"; content:"/admin?cmd=id"; sid:1000002; rev:3;)
 
 alert tcp any any -> 10.77.0.10 any (msg:"LAB TCP SYN Scan"; flags:S; detection_filter:track by_src, count 5, seconds 60; sid:1000003; rev:1;)
+
+alert tcp any any -> 10.77.0.10 80 (msg:"LAB HTTP Basic Auth Brute Force"; flow:to_server,established; content:"GET /login",depth 10; content:"Authorization|3a| Basic",nocase; detection_filter:track by_src, count 5, seconds 60; sid:1000004; rev:1;)
+
+alert udp any any -> 10.77.0.53 53 (msg:"LAB DNS Tunneling Pattern"; content:"|05|exfil|03|lab|00|"; sid:1000005; rev:1;)
+
+alert tcp any any -> 10.77.0.10 80 (msg:"LAB SQL Injection Probe"; flow:to_server,established; content:"GET /search?q=",depth 32; content:"UNION",nocase; sid:1000006; rev:1;)

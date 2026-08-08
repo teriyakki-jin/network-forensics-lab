@@ -3,333 +3,238 @@
 ![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Kali Linux](https://img.shields.io/badge/Kali-Linux-557C94?logo=kalilinux&logoColor=white)
 ![Snort 3](https://img.shields.io/badge/Snort-3-EF3B2D)
+![Suricata 8](https://img.shields.io/badge/Suricata-8-E34F26)
 ![Elastic Stack](https://img.shields.io/badge/Elastic_Stack-9.4.2-005571?logo=elastic&logoColor=white)
 [![Validation](https://github.com/teriyakki-jin/network-forensics-lab/actions/workflows/validate.yml/badge.svg)](https://github.com/teriyakki-jin/network-forensics-lab/actions/workflows/validate.yml)
 
-Docker Desktop 위에 격리된 공격·피해 테스트망을 만들고, 패킷 수집부터 IDS 탐지와 시각화까지 한 번에 재현하는 네트워크 포렌식 실습 프로젝트입니다.
+Docker 격리망에서 6개 공격 시나리오를 생성하고, 하나의 PCAP을 Snort 3와 Suricata 8로 교차 분석한 뒤 Elastic Stack에서 시각화하는 재현 가능한 네트워크 포렌식 랩입니다.
 
-> Kali → PCAP → Snort 3 → Logstash → Elasticsearch → Kibana
+![Snort와 Suricata 탐지 결과를 보여주는 Kibana Lens 대시보드](assets/kibana-lens-dashboard.png)
 
-**Portfolio focus:** Network Security · Digital Forensics · Detection Engineering · Data Pipeline · DevOps Automation
+## 핵심 결과
 
-[실행 화면](#실행-화면) · [아키텍처](#아키텍처) · [탐지 결과](#탐지-시나리오와-결과) · [빠른 시작](#빠른-시작) · [기술 사례](docs/CASE_STUDY.md)
+| 재현성 | 증거 | 탐지 범위 | 교차 검증 | 분석·자동화 |
+|---|---:|---:|---:|---:|
+| 명령 1개 | PCAP 159 packets | 공격 시나리오 6개 | Snort 45 / Suricata 45 | Lens 6개 + CI |
 
-## 실행 화면
+- 동일 PCAP에서 두 IDS가 6개 시나리오를 모두 탐지했고 시나리오별 경보 수 차이는 `0`이었습니다.
+- SHA-256, PCAP 구조, 패킷 수를 독립 Python 검증기로 확인합니다.
+- 6개 탐지를 MITRE ATT&CK 기술과 Sigma 규칙에 연결했습니다.
+- Docker 공격망은 `internal: true`, IDS 분석 컨테이너는 `network_mode: none`입니다.
+- 현재 테스트 스위트는 23개, branch coverage 포함 전체 커버리지는 91%입니다.
 
-![Kibana Discover에서 확인한 Snort 경보 30건](assets/kibana-discover.png)
-
-위 화면은 이 저장소의 테스트 트래픽을 직접 실행한 결과입니다. `snort-alerts-*` 데이터 뷰에서 30개의 IDS 경보와 원본 패킷 필드를 확인할 수 있습니다.
-
-## 핵심 성과
-
-| 재현성 | 탐지 | 무결성 | 가시성 | 품질 자동화 |
-|---|---|---|---|---|
-| **1개 명령**으로 전체 실행 | 커스텀 규칙 **3개** | PCAP **SHA-256** 검증 | Kibana 문서 **30건** | GitHub Actions **5종 검증** |
-
-- 공격 트래픽 생성부터 Kibana 데이터 뷰 구성까지 자동화했습니다.
-- 원본 PCAP 84패킷, Snort JSON 30행, Elasticsearch 30문서를 교차 검증했습니다.
-- 보안 경계를 코드로 표현했습니다: 격리망, localhost 바인딩, Snort 무네트워크 실행.
-- 실제 장애 원인을 분석하고 체크섬 오프로딩, WSL 저장소, Kibana 초기화 문제를 해결했습니다.
+> 수치는 저장소에 포함된 로컬 회귀 fixture 결과입니다. 실제 운영망의 일반적인 탐지 정확도를 의미하지 않습니다.
 
 ## 아키텍처
 
 ```mermaid
 flowchart LR
-    subgraph LAB["격리 테스트망 · lab_net · 10.77.0.0/24"]
+    subgraph LAB["격리 테스트망 · 10.77.0.0/24"]
         KALI["Kali Linux<br/>10.77.0.20"]
-        VICTIM["Nginx 피해 서버<br/>10.77.0.10"]
-        PCAP["tcpdump / tshark<br/>lab-traffic.pcap"]
-        KALI -->|"ICMP · HTTP probe · SYN scan"| VICTIM
-        KALI -->|"패킷 수집"| PCAP
+        VICTIM["Nginx victim<br/>10.77.0.10"]
+        DNS["CoreDNS<br/>10.77.0.53"]
+        PCAP["tcpdump<br/>lab-traffic.pcap"]
+        KALI -->|"ICMP · scan · HTTP"| VICTIM
+        KALI -->|"DNS tunnel pattern"| DNS
+        KALI -->|"packet capture"| PCAP
     end
 
-    PCAP -->|"오프라인 분석"| SNORT["Snort 3<br/>network_mode: none"]
-    SNORT --> JSON["JSON alerts"]
+    PCAP --> SNORT["Snort 3<br/>offline · no network"]
+    PCAP --> SURICATA["Suricata 8<br/>offline · no network"]
+    SNORT --> NORMALIZE["Python normalizer<br/>common event schema"]
+    SURICATA --> NORMALIZE
+    NORMALIZE --> COMPARE["Cross-engine comparison<br/>MITRE ATT&CK mapping"]
 
-    subgraph SOC["분석망 · soc_net"]
-        LOGSTASH["Logstash"] --> ES["Elasticsearch"] --> KIBANA["Kibana Discover"]
+    subgraph SOC["분석망 · localhost only"]
+        LOGSTASH["Logstash"] --> ES["Elasticsearch"] --> KIBANA["Kibana Lens"]
     end
 
-    JSON --> LOGSTASH
+    NORMALIZE --> LOGSTASH
+    COMPARE --> EVIDENCE["JSON evidence<br/>Sigma validation"]
 ```
 
-`lab_net`은 Docker의 `internal: true` 네트워크입니다. 공격 트래픽은 컨테이너 내부의 고정 IP 사이에서만 생성됩니다. Snort는 네트워크 인터페이스에 직접 붙지 않고, 저장된 PCAP을 `network_mode: none` 상태에서 분석합니다.
+공격 트래픽은 외부로 라우팅되지 않습니다. Snort와 Suricata는 라이브 인터페이스가 아니라 저장된 PCAP만 읽으므로 동일 증거에 대해 규칙 결과를 반복 비교할 수 있습니다.
 
-## 탐지 시나리오와 결과
+## 탐지 시나리오
 
-| 단계 | 생성 트래픽 | Snort SID | 탐지 결과 |
-|---|---|---:|---:|
-| 연결 확인 | ICMP Echo Request 3회 | `1000001` | 3건 |
-| 의심 경로 접근 | `GET /admin?cmd=id` | `1000002` | 1건 |
-| 제한형 포트 스캔 | TCP 1~30번 SYN 스캔 | `1000003` | 26건 |
-| **합계** |  |  | **30건** |
+| 시나리오 | 테스트 트래픽 | ATT&CK | Snort | Suricata |
+|---|---|---|---:|---:|
+| `icmp_echo` | ICMP echo request | T1018 Remote System Discovery | 4 | 4 |
+| `http_admin_probe` | `/admin?cmd=id` 접근 | T1190 Exploit Public-Facing Application | 1 | 1 |
+| `tcp_syn_scan` | 제한된 TCP SYN scan | T1046 Network Service Discovery | 33 | 33 |
+| `brute_force` | 반복 HTTP Basic 인증 | T1110 Brute Force | 1 | 1 |
+| `dns_tunneling` | 긴 subdomain DNS query | T1071.004 DNS | 5 | 5 |
+| `web_exploit` | SQL injection 형태의 query | T1190 Exploit Public-Facing Application | 1 | 1 |
+| **합계** |  |  | **45** | **45** |
 
-수집된 PCAP은 84패킷, 6,778바이트이며 현재 샘플의 SHA-256은 다음과 같습니다.
+각 시나리오는 다음 세 탐지 표현을 함께 가집니다.
 
-```text
-504c3711f3244644293fc261d7424b3971dbddb2eb8402fcfe2ad1c57877bbdd
-```
+- Snort 규칙: [`snort/local.rules`](snort/local.rules)
+- Suricata 규칙: [`suricata/local.rules`](suricata/local.rules)
+- Sigma 규칙: [`detection/sigma`](detection/sigma)
 
-## 구성 요소
+규칙 SID, 시나리오, ATT&CK tactic/technique의 단일 기준은 [`detection/rule-catalog.json`](detection/rule-catalog.json)입니다.
 
-| 구성 요소 | 역할 | 네트워크/포트 |
+## Threat → Control → Evidence
+
+| 위협·실패 모드 | 통제 | 검증 가능한 증거 |
 |---|---|---|
-| Kali Linux | 트래픽 생성, `tcpdump`, `tshark`, `nmap` | `10.77.0.20` |
-| Nginx | 실습용 피해 서버 | `10.77.0.10:80` |
-| Snort 3 | PCAP 오프라인 IDS 분석 | 네트워크 없음 |
-| Logstash 9.4.2 | Snort JSON을 ECS 형태로 정규화 | `soc_net` |
-| Elasticsearch 9.4.2 | 경보 색인 및 검색 | `127.0.0.1:9200` |
-| Kibana 9.4.2 | Discover 기반 분석 UI | `127.0.0.1:5601` |
-
-실습 PC의 부담을 줄이기 위해 JVM/Node 메모리를 Elasticsearch 1GB, Logstash 384MB, Kibana 768MB로 제한했습니다.
-
-## 설계 의사결정
-
-| 결정 | 선택 이유 | 트레이드오프 |
-|---|---|---|
-| Docker 격리망 | 외부 시스템에 테스트 트래픽이 전달되는 것을 방지 | 실제 라우팅 환경과 차이가 있음 |
-| Snort 오프라인 PCAP 분석 | 동일 증거로 규칙을 반복 검증 가능 | 실시간 차단 기능은 없음 |
-| ECS 유사 필드 변환 | IP·포트·규칙 기반 KQL 검색 단순화 | 완전한 ECS 호환은 추가 매핑 필요 |
-| 샘플 증거 버전 관리 | 실행 없이도 입력·결과·해시 검토 가능 | 대규모 PCAP에는 Git LFS 필요 |
-| 경량 CI와 로컬 통합 테스트 분리 | PR 검증 속도와 실제 스택 검증을 모두 확보 | CI에서는 전체 Elastic 실행을 생략 |
-
-## 문제 해결 하이라이트
-
-| 문제 | 원인 | 해결 |
-|---|---|---|
-| HTTP 규칙 미탐지 | Docker 가상 NIC 체크섬 오프로딩 | Snort 오프라인 분석에 `-k none` 적용 |
-| Docker 저장소 읽기 전용 전환 | 이미지 압축 해제 중 호스트 디스크 소진 | 공간 확보, WSL/Docker 복구, 재검증 |
-| Kibana UI 준비 지연 | 최초 플러그인 초기화와 saved object migration | `/api/status` 확인과 데이터 뷰 자동 구성 |
-
-자세한 판단 근거와 트러블슈팅 과정은 [Technical Case Study](docs/CASE_STUDY.md)에 정리했습니다.
+| 테스트 트래픽의 외부 유출 | Docker internal network, 고정 사설 IP | [`compose.yaml`](compose.yaml) 계약 테스트 |
+| IDS별 형식 차이 | 공통 이벤트 스키마로 정규화 | [`alerts/normalized-alerts.jsonl`](alerts/normalized-alerts.jsonl) |
+| 단일 IDS 편향 | 동일 PCAP을 두 엔진으로 교차 분석 | [`evidence/ids-comparison.json`](evidence/ids-comparison.json) |
+| PCAP 변조 | SHA-256 및 binary header 검사 | [`evidence/pcap-regression.json`](evidence/pcap-regression.json) |
+| 탐지 설명의 표준 부재 | ATT&CK 및 Sigma 매핑 | [`evidence/sigma-validation.json`](evidence/sigma-validation.json) |
+| 수동 대시보드 구성 드리프트 | 고정 ID Lens dashboard API upsert | [`scripts/setup-kibana.ps1`](scripts/setup-kibana.ps1) |
+| 회귀 규칙의 조용한 실패 | PCAP 기반 Snort·Suricata CI | [Validation workflow](.github/workflows/validate.yml) |
 
 ## 빠른 시작
 
 ### 요구 사항
 
 - Windows 10/11 + WSL2
-- Docker Desktop과 Docker Compose
-- 최초 이미지 다운로드 및 압축 해제를 위한 충분한 디스크 여유 공간
+- Docker Desktop / Docker Compose
 - PowerShell 5.1 이상
+- Python 3.12 이상
 
-### 저장소 받기
+### 전체 랩 실행
 
 ```powershell
-Set-Location D:\develop
 git clone https://github.com/teriyakki-jin/network-forensics-lab.git
 Set-Location .\network-forensics-lab
-```
-
-### 전체 파이프라인 실행
-
-```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1
 ```
 
-스크립트는 다음 작업을 자동으로 수행합니다.
+스크립트는 다음 작업을 순서대로 수행합니다.
 
-1. Docker 엔진 확인
-2. Kali와 Nginx 격리망 시작
-3. `tcpdump` 패킷 캡처
-4. ICMP, HTTP probe, 제한형 SYN scan 생성
-5. PCAP SHA-256 기록
-6. Snort 3 오프라인 분석
-7. Elastic Stack 시작 및 문서 적재 확인
-8. Kibana 준비 상태 확인 및 `snort-alerts-*` 데이터 뷰 구성
+1. Kali, victim, DNS가 있는 격리망 시작
+2. 6개 허가된 테스트 트래픽 생성 및 PCAP 수집
+3. PCAP SHA-256 기록
+4. Snort 3와 Suricata 8 오프라인 분석
+5. 경보 정규화, 엔진별 탐지 비교, Sigma 검증
+6. Elasticsearch 적재 문서 수 확인
+7. Kibana 데이터 뷰와 Lens 대시보드 생성
 
-Elastic 이미지 다운로드를 미루고 PCAP과 Snort까지만 실행하려면 다음 옵션을 사용합니다.
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-lab.ps1 -SkipElastic
-```
-
-## Kibana에서 분석하기
-
-1. [Kibana Discover](http://127.0.0.1:5601/app/discover)에 접속합니다.
-2. `run-lab.ps1`이 생성한 `snort-alerts-*` 데이터 뷰를 선택합니다.
-3. 샘플 이벤트가 보이지 않으면 시간 범위를 `Last 2 hours` 이상으로 넓힙니다.
-
-유용한 KQL 예시:
-
-```text
-rule.id: 1000002
-```
-
-```text
-source.ip: "10.77.0.20" and destination.ip: "10.77.0.10"
-```
-
-```text
-rule.description: "LAB TCP SYN Scan"
-```
-
-```text
-network.transport: "tcp" and destination.port <= 30
-```
-
-Elasticsearch에서 직접 적재 건수를 확인할 수도 있습니다.
+Elastic Stack 없이 PCAP과 두 IDS만 검증하려면 다음 옵션을 사용합니다.
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:9200/snort-alerts-*/_count
+.\scripts\run-lab.ps1 -SkipElastic
+```
+
+### 분석 화면
+
+- [Kibana Lens dashboard](http://127.0.0.1:5601/app/dashboards#/view/network-forensics-overview)
+- [Kibana Discover](http://127.0.0.1:5601/app/discover)
+- Elasticsearch count: `http://127.0.0.1:9200/ids-alerts-*/_count`
+
+종료 및 리소스 정리:
+
+```powershell
+docker compose down -v --remove-orphans
+```
+
+## 독립 검증
+
+개발 의존성을 설치한 후 Docker 없이도 커밋된 fixture와 탐지 콘텐츠를 검증할 수 있습니다.
+
+```powershell
+python -m pip install -r .\requirements-dev.txt
+python -m unittest discover -s tests -v
+python -m forensics.cli verify-fixture `
+  --pcap evidence/lab-traffic.pcap `
+  --checksum evidence/lab-traffic.pcap.sha256
+python -m forensics.cli validate-sigma --directory detection/sigma
+.\scripts\run-comparison.ps1
+```
+
+현재 fixture 무결성 값:
+
+```text
+93160865ac7136c6f609e8c72a4940326e4c0ec22c16b9ab18f3463d09ae82f0
 ```
 
 ## Wireshark / tshark 분석
 
-Wireshark에서 `evidence/lab-traffic.pcap`을 열고 다음 디스플레이 필터를 적용합니다.
+Wireshark에서 [`evidence/lab-traffic.pcap`](evidence/lab-traffic.pcap)을 열고 다음 display filter를 적용할 수 있습니다.
 
 ```text
 icmp && ip.src == 10.77.0.20
 ```
 
 ```text
-http.request.uri contains "/admin"
-```
-
-```text
 tcp.flags.syn == 1 && tcp.flags.ack == 0
 ```
 
-컨테이너의 `tshark`로도 같은 증거를 확인할 수 있습니다.
+```text
+dns.qry.name.len > 50
+```
+
+```text
+http.request.uri contains "/admin" || http.request.uri contains "UNION"
+```
+
+CLI 예시:
 
 ```powershell
 docker compose exec kali tshark -r /evidence/lab-traffic.pcap -q -z conv,tcp
-docker compose exec kali tshark -r /evidence/lab-traffic.pcap -Y 'http.request' -V
-docker compose exec kali tshark -r /evidence/lab-traffic.pcap -Y 'tcp.flags.syn == 1 && tcp.flags.ack == 0'
+docker compose exec kali tshark -r /evidence/lab-traffic.pcap -Y 'dns.qry.name.len > 50'
 ```
 
-## 증거 무결성 확인
+## CI 품질 게이트
 
-```powershell
-$actual = (Get-FileHash .\evidence\lab-traffic.pcap -Algorithm SHA256).Hash.ToLowerInvariant()
-$expected = (Get-Content .\evidence\lab-traffic.pcap.sha256).Split(' ')[0]
-$actual -eq $expected
-```
+GitHub Actions는 push와 pull request마다 다음을 검증합니다.
 
-경보를 SID별로 집계하려면:
+- Python 단위·CLI·저장소 계약 테스트와 branch coverage
+- PCAP SHA-256 및 구조 회귀 검사
+- 6개 Sigma 규칙의 필수 필드와 ATT&CK tag
+- 커밋된 PCAP에 대한 Snort·Suricata 오프라인 재분석
+- 두 엔진이 모든 시나리오를 탐지했는지 비교
+- Compose, Bash, Node.js, PowerShell 구문 검사
+- Actions SHA 고정 및 컨테이너 이미지 버전 정책
 
-```powershell
-Get-Content .\alerts\alert_json.txt |
-    ForEach-Object { $_ | ConvertFrom-Json } |
-    Group-Object sid |
-    Select-Object Name, Count
-```
+## 주요 설계 결정
 
-## 자동 검증
-
-GitHub Actions의 `Validation` 워크플로는 push와 pull request마다 다음을 확인합니다.
-
-- `docker compose config` 구성 유효성
-- Snort JSON 파싱 및 샘플 30행
-- PCAP SHA-256 무결성
-- Bash와 Node.js 구문
-- 모든 PowerShell 스크립트 구문
-
-로컬에서 동일한 핵심 검증을 빠르게 실행하려면:
-
-```powershell
-docker compose config --quiet
-node --check .\scripts\capture-kibana.mjs
-```
-
-## 스크린샷 다시 만들기
-
-Kibana가 실행 중이고 데이터 뷰 `snort-alerts`가 존재할 때 다음 명령으로 README 이미지를 갱신할 수 있습니다.
-
-```powershell
-node .\scripts\capture-kibana.mjs
-```
-
-기본 Chrome 경로가 다르면 `CHROME_PATH` 환경 변수로 지정합니다.
-
-```powershell
-$env:CHROME_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-node .\scripts\capture-kibana.mjs
-```
+| 결정 | 이유 | 한계 |
+|---|---|---|
+| 한 PCAP을 두 IDS가 공유 | 입력 차이를 제거해 규칙 차이만 비교 | 실시간 인라인 차단은 평가하지 않음 |
+| 최소 공통 이벤트 스키마 | 엔진 종속 필드를 검색·시각화 가능한 구조로 통합 | 전체 ECS 구현은 아님 |
+| 룰 카탈로그를 단일 기준으로 사용 | SID와 ATT&CK 매핑 드리프트 방지 | 룰 변경 시 catalog도 함께 갱신 필요 |
+| Lens API 기반 dashboard as code | 수동 UI 작업 없이 같은 화면 재현 | Kibana API 버전에 영향받음 |
+| 작은 결정적 fixture를 Git에 포함 | PR에서 빠른 회귀 검증 | 대규모 실제망 성능을 대표하지 않음 |
 
 ## 디렉터리 구조
 
 ```text
 network-forensics-lab/
-├─ alerts/                  # Snort JSON 경보
-├─ assets/                  # README 스크린샷
-├─ docs/                    # 기술 사례와 설계 판단
-├─ evidence/                # PCAP, 해시, nmap 결과
-├─ kali/                    # Kali 분석 이미지
-├─ logstash/pipeline/       # JSON → ECS 변환 파이프라인
-├─ scripts/                 # 실행, 종료, 화면 캡처 자동화
-├─ snort/                   # Snort 로컬 규칙과 실행기
-├─ compose.yaml
-├─ README.md
-└─ VERIFICATION.md
+├─ .github/workflows/validate.yml
+├─ alerts/                    # 두 IDS 원본/정규화 경보
+├─ assets/                    # 포트폴리오 스크린샷
+├─ detection/                 # 룰 catalog와 Sigma
+├─ dns/                       # 격리망 CoreDNS
+├─ evidence/                  # PCAP, hash, 비교·검증 결과
+├─ forensics/                 # 정규화·비교·무결성 Python package
+├─ kali/                      # traffic generator image/script
+├─ logstash/                  # IDS 공통 이벤트 ingestion
+├─ scripts/                   # one-click 실행·dashboard·캡처
+├─ snort/                     # Snort 3 rules/runner
+├─ suricata/                  # Suricata 8 rules/runner
+├─ tests/                     # unit, CLI, repository contracts
+└─ victim/                    # Nginx test target
 ```
 
-## 운영 명령
+## 범위와 제한사항
 
-현재 상태 확인:
+- 이 프로젝트는 소유한 로컬 시스템에서 실행하는 교육·회귀 검증용 랩입니다.
+- 스캔 범위와 목적지는 격리 컨테이너의 고정 IP로 제한합니다.
+- Elasticsearch와 Kibana 인증은 로컬 편의를 위해 비활성화되어 있으며 포트는 `127.0.0.1`에만 바인딩됩니다.
+- 탐지 결과는 저장소 fixture에 대한 결과이며 운영망의 FPR, recall, 처리량을 일반화하지 않습니다.
+- 대규모 PCAP, 암호화 트래픽 복호화, 실시간 차단, 분산 센서 운영은 범위 밖입니다.
 
-```powershell
-docker compose ps
-docker compose logs --tail 100 logstash kibana
-```
+## 문서
 
-컨테이너만 종료하고 Elastic 데이터를 보존:
+- [Technical Case Study](docs/CASE_STUDY.md)
+- [Velog 게시글 초안](docs/VELOG_POST.md)
+- [Verification record](VERIFICATION.md)
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-lab.ps1
-```
+## License
 
-Elastic 볼륨까지 삭제:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-lab.ps1 -DeleteElasticData
-```
-
-`-DeleteElasticData`는 기존 Elasticsearch 인덱스와 Logstash 처리 상태를 함께 삭제합니다.
-
-## 문제 해결
-
-### Kibana에 데이터가 보이지 않음
-
-- 시간 범위를 `Last 2 hours` 이상으로 변경합니다.
-- `Invoke-RestMethod http://127.0.0.1:9200/snort-alerts-*/_count`로 적재 여부를 확인합니다.
-- `docker compose logs logstash`에서 파이프라인 오류를 확인합니다.
-
-### Docker Desktop / WSL 오류
-
-관리자 PowerShell에서 다음 명령을 실행하거나 Windows를 재시작합니다.
-
-```powershell
-wsl --shutdown
-Restart-Service WslService -Force
-Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
-```
-
-### `read-only file system` 오류
-
-호스트 드라이브의 여유 공간을 확인합니다. Docker 이미지 압축 해제 중 공간이 소진되면 WSL의 Docker 저장소가 읽기 전용으로 전환될 수 있습니다.
-
-```powershell
-[System.IO.DriveInfo]::new('C').AvailableFreeSpace / 1GB
-```
-
-## 보안 범위와 제한사항
-
-- 이 프로젝트는 **로컬 격리 실습 전용**입니다.
-- Elasticsearch/Kibana 인증은 편의를 위해 비활성화되어 있으며 포트는 localhost에만 바인딩됩니다.
-- Snort는 인라인 차단 장비가 아니라 저장된 PCAP을 분석하는 오프라인 IDS로 동작합니다.
-- 스캔 대상은 실습용 Nginx 컨테이너와 TCP 1~30번 포트로 제한됩니다.
-- 허가받지 않은 외부 시스템이나 운영망을 대상으로 사용하지 마십시오.
-
-## 확장 로드맵
-
-- [ ] Brute force, DNS tunneling, web exploit 트래픽 추가
-- [ ] Suricata EVE JSON과 Snort 결과 비교
-- [ ] Kibana Lens 대시보드 자동 프로비저닝
-- [ ] MITRE ATT&CK technique 및 Sigma 규칙 매핑
-- [ ] 경량 PCAP 회귀 테스트를 CI에 추가
-
-## 더 읽기
-
-- [실행 검증 결과](VERIFICATION.md)
-- [설계·트러블슈팅 Technical Case Study](docs/CASE_STUDY.md)
-- [Velog 게시용 기술 글](docs/VELOG_POST.md)
+[MIT License](LICENSE)

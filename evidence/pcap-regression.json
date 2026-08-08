@@ -1,0 +1,23 @@
+{
+  "integrity": {
+    "actual": "93160865ac7136c6f609e8c72a4940326e4c0ec22c16b9ab18f3463d09ae82f0",
+    "algorithm": "sha256",
+    "bytes": 16025,
+    "expected": "93160865ac7136c6f609e8c72a4940326e4c0ec22c16b9ab18f3463d09ae82f0",
+    "matches": true,
+    "path": "lab-traffic.pcap"
+  },
+  "pcap": {
+    "captured_bytes": 13457,
+    "file_bytes": 16025,
+    "format": "pcap",
+    "link_type": 1,
+    "original_bytes": 13457,
+    "packets": 159,
+    "path": "lab-traffic.pcap",
+    "snaplen": 262144,
+    "timestamp_precision": "microseconds",
+    "version": "2.4"
+  },
+  "schema_version": 1
+}
