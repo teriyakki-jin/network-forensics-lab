@@ -278,7 +278,6 @@ network-forensics-lab/
 
 - [Technical Case Study](docs/CASE_STUDY.md)
 - [Automotive/OT Threat Model](docs/THREAT_MODEL.md)
-- [Velog 게시글 초안](docs/VELOG_POST.md)
 - [Verification record](VERIFICATION.md)
 
 ## License
