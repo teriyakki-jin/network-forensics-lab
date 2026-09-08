@@ -18,6 +18,8 @@ EXPECTED_SCENARIOS = {
     "brute_force",
     "dns_tunneling",
     "web_exploit",
+    "doip_unauthorized_diagnostic",
+    "someip_service_discovery",
 }
 
 
@@ -38,6 +40,12 @@ class ComposeSecurityContractTests(unittest.TestCase):
             self.assertEqual(services[engine]["network_mode"], "none")
             self.assertIn("tools", services[engine]["profiles"])
 
+    def test_vehicle_gateway_is_isolated_and_has_a_fixed_address(self) -> None:
+        gateway = self.compose["services"]["vehicle-gateway"]
+        self.assertEqual(gateway["networks"]["lab_net"]["ipv4_address"], "10.77.0.30")
+        self.assertNotIn("ports", gateway)
+        self.assertEqual(set(gateway["networks"]), {"lab_net"})
+
     def test_container_images_and_base_image_do_not_use_latest_tags(self) -> None:
         for service, config in self.compose["services"].items():
             image = config.get("image")
@@ -56,13 +64,27 @@ class ComposeSecurityContractTests(unittest.TestCase):
 
 
 class DetectionContentContractTests(unittest.TestCase):
-    def test_catalog_contains_six_mapped_scenarios(self) -> None:
+    def test_catalog_contains_eight_mapped_scenarios(self) -> None:
         catalog_path = ROOT / "detection" / "rule-catalog.json"
         payload = json.loads(catalog_path.read_text(encoding="utf-8"))
         scenarios = {rule["scenario"] for rule in payload["rules"]}
         self.assertEqual(scenarios, EXPECTED_SCENARIOS)
         catalog = load_rule_catalog(catalog_path)
-        self.assertEqual(len(catalog), 12)
+        self.assertEqual(len(catalog), 16)
+
+    def test_automotive_scenarios_use_ics_attack_mapping(self) -> None:
+        payload = json.loads(
+            (ROOT / "detection" / "rule-catalog.json").read_text(encoding="utf-8")
+        )
+        automotive = {
+            rule["scenario"]: rule
+            for rule in payload["rules"]
+            if rule["scenario"].startswith(("doip_", "someip_"))
+        }
+        self.assertEqual(set(automotive), {"doip_unauthorized_diagnostic", "someip_service_discovery"})
+        for rule in automotive.values():
+            self.assertEqual(rule["domain"], "automotive_ics")
+            self.assertTrue(rule["attack"]["technique_id"].startswith("T"))
 
     def test_snort_and_suricata_rules_cover_every_catalog_sid(self) -> None:
         payload = json.loads(
@@ -106,9 +128,20 @@ class AutomationContractTests(unittest.TestCase):
             "brute force",
             "DNS tunneling",
             "web exploit",
+            "DoIP unauthorized diagnostic",
+            "SOME/IP service discovery",
         ):
             self.assertIn(marker, script)
         self.assertIn("run-comparison.ps1", script)
+        self.assertIn("build-case", script)
+        self.assertIn("case-manifest.json", script)
+        self.assertIn("incident-timeline.json", script)
+
+    def test_traffic_generator_targets_only_the_isolated_vehicle_gateway(self) -> None:
+        script = (ROOT / "kali" / "generate-traffic.sh").read_text(encoding="utf-8")
+        self.assertIn("/dev/tcp/10.77.0.30/13400", script)
+        self.assertIn("/dev/udp/10.77.0.30/30490", script)
+        self.assertIn("ARS_AUTOMOTIVE_FIXTURE", script)
 
     def test_run_script_waits_for_elasticsearch_before_using_index_api(self) -> None:
         script = (ROOT / "scripts" / "run-lab.ps1").read_text(encoding="utf-8")
@@ -121,9 +154,16 @@ class AutomationContractTests(unittest.TestCase):
             "-Method Delete -Uri 'http://127.0.0.1:9200/ids-alerts-*'", script
         )
 
+    def test_empty_elasticsearch_index_response_is_ignored(self) -> None:
+        script = (ROOT / "scripts" / "run-lab.ps1").read_text(encoding="utf-8")
+        self.assertIn("IsNullOrWhiteSpace", script)
+        self.assertIn("continue", script)
+
     def test_kibana_setup_creates_repeatable_lens_dashboard(self) -> None:
         script = (ROOT / "scripts" / "setup-kibana.ps1").read_text(encoding="utf-8")
         self.assertIn("network-forensics-overview", script)
+        self.assertIn("Automotive & Manufacturing Network Forensics Lab", script)
+        self.assertIn("eight authorized enterprise and automotive", script)
         self.assertIn("/api/dashboards/$DashboardId", script)
         for field in (
             "engine.keyword",

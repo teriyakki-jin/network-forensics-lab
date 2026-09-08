@@ -85,16 +85,16 @@ $DataSource = @{
 
 $DashboardId = 'network-forensics-overview'
 $Dashboard = @{
-    title  = 'Network Forensics Lab | Snort vs Suricata'
+    title  = 'Automotive & Manufacturing Network Forensics Lab'
     panels = @(
         @{
             grid   = @{ x = 0; y = 0; w = 48; h = 4 }
             type   = 'markdown'
             config = @{
                 content = @'
-## Network Forensics Lab
+## Automotive & Manufacturing Network Forensics Lab
 
-Cross-engine evidence for six authorized attack scenarios in an isolated lab. Snort 3 and Suricata 8 alerts are normalized and mapped to MITRE ATT&CK techniques.
+Cross-engine evidence for eight authorized enterprise and automotive scenarios in an isolated lab. DoIP and SOME/IP alerts are normalized and mapped to MITRE ATT&CK and ATT&CK for ICS.
 '@
             }
         }

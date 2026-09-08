@@ -1,0 +1,18 @@
+title: LAB SOME/IP Unauthorized Service Discovery
+id: 953f590b-d47b-4d87-8f06-f2be65995fae
+status: test
+description: Detects the synthetic unauthorized SOME/IP discovery request in the isolated automotive lab.
+author: teriyakki-jin
+date: 2026-09-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000008'
+  condition: selection
+falsepositives:
+  - Approved service discovery in the isolated lab
+level: medium
+tags:
+  - attack.discovery
+  - attack.t0846.003

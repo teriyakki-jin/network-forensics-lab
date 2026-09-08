@@ -96,6 +96,8 @@ class NormalisationTests(unittest.TestCase):
         self.assertEqual(result["scenario"], "brute_force")
         self.assertEqual(result["threat"]["technique"]["id"], "T1110")
         self.assertEqual(result["source"]["ip"], "10.77.0.20")
+        self.assertEqual(result["labels"]["domain"], "enterprise")
+        self.assertEqual(result["threat"]["framework"], "MITRE ATT&CK")
         self.assertEqual(result["@timestamp"], "2026-08-08T14:10:23Z")
         self.assertNotIn("authorization", json.dumps(result).lower())
         self.assertNotIn("ZGVtbzpiYWQ=", json.dumps(result))

@@ -17,3 +17,11 @@ done
 curl -sS --path-as-is \
   'http://10.77.0.10/search?q=1%20UNION%20SELECT%20password' \
   >/dev/null || true
+
+# ARS_AUTOMOTIVE_FIXTURE: synthetic DoIP diagnostic message (UDS WriteDataByIdentifier)
+printf '\002\375\200\001\000\000\000\007\016\200\020\001\056\361\220' \
+  | bash -c 'cat > /dev/tcp/10.77.0.30/13400' || true
+
+# ARS_AUTOMOTIVE_FIXTURE: synthetic SOME/IP-SD FindService entry
+printf '\377\377\201\000\000\000\000\044\000\000\000\001\001\001\002\000\300\000\000\000\000\000\000\020\000\000\000\000\022\064\377\377\377\000\000\003\377\377\377\377\000\000\000\000' \
+  | bash -c 'cat > /dev/udp/10.77.0.30/30490' || true

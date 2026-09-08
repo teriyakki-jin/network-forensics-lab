@@ -22,6 +22,17 @@ services:
         ipv4_address: 10.77.0.53
     restart: unless-stopped
 
+  vehicle-gateway:
+    image: python:3.12-alpine@sha256:b64631e04e4920160c50fbe8d8df828f7f35f06f425cb44aa09bca53e708a35a
+    container_name: nf-vehicle-gateway
+    command: ["python", "/app/server.py"]
+    volumes:
+      - ./vehicle-gateway/server.py:/app/server.py:ro
+    networks:
+      lab_net:
+        ipv4_address: 10.77.0.30
+    restart: unless-stopped
+
   kali:
     build:
       context: ./kali
@@ -39,6 +50,7 @@ services:
     depends_on:
       - victim
       - dns
+      - vehicle-gateway
     restart: unless-stopped
 
   snort:

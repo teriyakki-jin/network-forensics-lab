@@ -1,0 +1,18 @@
+title: LAB DoIP Unauthorized Diagnostic Session
+id: 83921f8a-6b75-4ce6-920a-c757965a26bc
+status: test
+description: Detects the synthetic unauthorized DoIP diagnostic request in the isolated automotive lab.
+author: teriyakki-jin
+date: 2026-09-08
+logsource:
+  category: network_detection
+detection:
+  selection:
+    rule.id: '1000007'
+  condition: selection
+falsepositives:
+  - Approved diagnostic tester in the isolated lab
+level: high
+tags:
+  - attack.execution
+  - attack.t1692.001

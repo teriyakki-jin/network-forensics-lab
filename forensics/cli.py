@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
+from .incident import build_case_manifest, build_timeline, evaluate_detection
 from .pipeline import (
     build_comparison,
     inspect_pcap,
@@ -83,6 +84,56 @@ def _validate_sigma(args: argparse.Namespace) -> dict[str, Any]:
     return payload
 
 
+def _tool_versions(values: list[str]) -> dict[str, str]:
+    versions: dict[str, str] = {}
+    for value in values:
+        name, separator, version = value.partition("=")
+        if not separator or not name or not version:
+            raise ValueError(f"tool version must use name=version: {value}")
+        versions[name] = version
+    return versions
+
+
+def _build_case(args: argparse.Namespace) -> dict[str, Any]:
+    records = _read_jsonl(args.normalised)
+    manifest = build_case_manifest(
+        case_id=args.case_id,
+        evidence_root=args.evidence_root,
+        artifacts=args.artifact,
+        acquired_at=args.acquired_at,
+        sensor_id=args.sensor_id,
+        tool_versions=_tool_versions(args.tool_version),
+    )
+    timeline = {
+        "schema_version": 1,
+        "case_id": args.case_id,
+        "events": build_timeline(records),
+    }
+    _write_json(args.manifest, manifest)
+    _write_json(args.timeline, timeline)
+    return {
+        "schema_version": 1,
+        "case_id": args.case_id,
+        "artifacts": len(manifest["artifacts"]),
+        "timeline_events": len(timeline["events"]),
+        "manifest": str(args.manifest),
+        "timeline": str(args.timeline),
+    }
+
+
+def _evaluate(args: argparse.Namespace) -> dict[str, Any]:
+    ground_truth = json.loads(args.ground_truth.read_text(encoding="utf-8"))
+    if ground_truth.get("schema_version") != 1 or not isinstance(
+        ground_truth.get("scenarios"), list
+    ):
+        raise ValueError("ground truth must use schema_version 1 with a scenarios list")
+    payload = evaluate_detection(
+        _read_jsonl(args.alerts), ground_truth["scenarios"], engine=args.engine
+    )
+    _write_json(args.output, payload)
+    return payload
+
+
 def _path(value: str) -> Path:
     return Path(value)
 
@@ -109,6 +160,29 @@ def build_parser() -> argparse.ArgumentParser:
     sigma.add_argument("--directory", type=_path, required=True)
     sigma.add_argument("--output", type=_path)
     sigma.set_defaults(handler=_validate_sigma)
+
+    case = subparsers.add_parser(
+        "build-case", help="build a hashed case manifest and incident timeline"
+    )
+    case.add_argument("--case-id", required=True)
+    case.add_argument("--evidence-root", type=_path, required=True)
+    case.add_argument("--artifact", type=_path, action="append", required=True)
+    case.add_argument("--normalised", type=_path, required=True)
+    case.add_argument("--acquired-at", required=True)
+    case.add_argument("--sensor-id", required=True)
+    case.add_argument("--tool-version", action="append", default=[])
+    case.add_argument("--manifest", type=_path, required=True)
+    case.add_argument("--timeline", type=_path, required=True)
+    case.set_defaults(handler=_build_case)
+
+    evaluate = subparsers.add_parser(
+        "evaluate", help="calculate scenario-level metrics against ground truth"
+    )
+    evaluate.add_argument("--alerts", type=_path, required=True)
+    evaluate.add_argument("--ground-truth", type=_path, required=True)
+    evaluate.add_argument("--engine", choices=("snort", "suricata"), required=True)
+    evaluate.add_argument("--output", type=_path, required=True)
+    evaluate.set_defaults(handler=_evaluate)
     return parser
 
 

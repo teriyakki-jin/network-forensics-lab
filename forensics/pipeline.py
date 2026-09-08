@@ -52,6 +52,8 @@ def _normalised_record(
     timestamp: Any,
     severity: Any = None,
 ) -> dict[str, Any]:
+    domain = str(rule.get("domain", "enterprise"))
+    framework = "MITRE ATT&CK for ICS" if domain == "automotive_ics" else "MITRE ATT&CK"
     record: dict[str, Any] = {
         "@timestamp": timestamp,
         "engine": engine,
@@ -71,7 +73,9 @@ def _normalised_record(
         },
         "network": {"transport": str(event.get(transport_key, "")).lower()},
         "observer": {"type": "ids", "product": engine},
+        "labels": {"domain": domain},
         "threat": {
+            "framework": framework,
             "tactic": {"name": rule["attack"]["tactic"]},
             "technique": {
                 "id": rule["attack"]["technique_id"],

@@ -53,6 +53,9 @@ function Clear-LabIndices {
 
     foreach ($Index in $Indices) {
         $ExactName = [string]$Index.index
+        if ([string]::IsNullOrWhiteSpace($ExactName)) {
+            continue
+        }
         if ($ExactName -notlike 'ids-alerts-*') {
             throw "Refusing to delete unexpected index: $ExactName"
         }
@@ -71,14 +74,14 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Docker Desktop is not running.'
 }
 
-Write-Host '[2/10] Starting isolated network, DNS, Kali, and victim'
-Invoke-Compose up -d --build victim dns kali
+Write-Host '[2/10] Starting isolated network, DNS, Kali, victim, and vehicle gateway'
+Invoke-Compose up -d --build victim dns vehicle-gateway kali
 
 Write-Host '[3/10] Starting packet capture on Kali'
 Invoke-Compose exec -T kali sh -lc 'rm -f /evidence/lab-traffic.pcap /tmp/tcpdump.pid; tcpdump -i eth0 -nn -U -w /evidence/lab-traffic.pcap >/tmp/tcpdump.log 2>&1 & echo $! >/tmp/tcpdump.pid'
 Start-Sleep -Seconds 2
 
-Write-Host '[4/10] Generating authorized scenarios: ICMP, HTTP admin probe, SYN scan, brute force, DNS tunneling, web exploit'
+Write-Host '[4/10] Generating authorized scenarios: ICMP, HTTP admin probe, SYN scan, brute force, DNS tunneling, web exploit, DoIP unauthorized diagnostic, SOME/IP service discovery'
 Invoke-Compose exec -T kali sh /lab/generate-traffic.sh
 Start-Sleep -Seconds 2
 Invoke-Compose exec -T kali sh -lc 'kill -2 $(cat /tmp/tcpdump.pid) 2>/dev/null || true; sleep 2; capinfos /evidence/lab-traffic.pcap'
@@ -122,6 +125,28 @@ Write-Host '[7/10] Normalising alerts and comparing IDS coverage'
 
 $NormalisedPath = Join-Path $LabRoot 'alerts\normalized-alerts.jsonl'
 $ExpectedCount = @(Get-Content -LiteralPath $NormalisedPath).Count
+$AcquiredAt = (Get-Item -LiteralPath $PcapPath).LastWriteTimeUtc.ToString('yyyy-MM-ddTHH:mm:ssZ')
+$CaseArguments = @(
+    '-m', 'forensics.cli', 'build-case',
+    '--case-id', 'NF-AUTO-LAB',
+    '--evidence-root', $LabRoot,
+    '--artifact', $PcapPath,
+    '--artifact', (Join-Path $LabRoot 'evidence\lab-traffic.pcap.sha256'),
+    '--artifact', $NormalisedPath,
+    '--artifact', (Join-Path $LabRoot 'evidence\ids-comparison.json'),
+    '--artifact', (Join-Path $LabRoot 'evidence\sigma-validation.json'),
+    '--normalised', $NormalisedPath,
+    '--acquired-at', $AcquiredAt,
+    '--sensor-id', 'sensor-vehicle-gateway',
+    '--tool-version', 'snort=3',
+    '--tool-version', 'suricata=8.0.6',
+    '--manifest', (Join-Path $LabRoot 'evidence\case-manifest.json'),
+    '--timeline', (Join-Path $LabRoot 'evidence\incident-timeline.json')
+)
+& python @CaseArguments | Out-Host
+if ($LASTEXITCODE -ne 0) {
+    throw 'Case manifest and incident timeline generation failed.'
+}
 
 if (-not $SkipElastic) {
     Write-Host '[8/10] Starting Elasticsearch and clearing the previous lab index'

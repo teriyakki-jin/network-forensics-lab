@@ -1,0 +1,40 @@
+{
+  "acquisition": {
+    "acquired_at": "2026-09-08T07:17:03Z",
+    "sensor_id": "sensor-vehicle-gateway",
+    "timezone": "UTC"
+  },
+  "artifacts": [
+    {
+      "bytes": 53561,
+      "path": "alerts/normalized-alerts.jsonl",
+      "sha256": "72215f82149e71d9b4409db0b373dd1c7b658405f81433c027b009c7a0e0537d"
+    },
+    {
+      "bytes": 3024,
+      "path": "evidence/ids-comparison.json",
+      "sha256": "c35b8f629e843ed07d9979ce6b83ff7e12320d1a3b94f4b2cd8393403abbe5da"
+    },
+    {
+      "bytes": 16756,
+      "path": "evidence/lab-traffic.pcap",
+      "sha256": "8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e"
+    },
+    {
+      "bytes": 84,
+      "path": "evidence/lab-traffic.pcap.sha256",
+      "sha256": "288fd993dbfcd82c7d311ef0875bc2989a9d714d7e985f8ca79181643d2c33fa"
+    },
+    {
+      "bytes": 1913,
+      "path": "evidence/sigma-validation.json",
+      "sha256": "b5d0820eee44a09bb29eda2a10d45764eeb89dff90583399dc71f8c1548e6518"
+    }
+  ],
+  "case_id": "NF-AUTO-LAB",
+  "schema_version": 1,
+  "tool_versions": {
+    "snort": "3",
+    "suricata": "8.0.6"
+  }
+}

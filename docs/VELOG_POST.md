@@ -23,14 +23,14 @@ Velog 태그: 네트워크보안, 디지털포렌식, Snort, Suricata, Wireshark
 
 | 항목 | 결과 |
 |---|---:|
-| 공격 시나리오 | 6개 |
-| PCAP | 159 packets / 16,025 bytes |
+| 공격 시나리오 | 8개 |
+| PCAP | 168 packets / 16,756 bytes |
 | Snort 경보 | 45건 |
 | Suricata 경보 | 45건 |
-| 양쪽 IDS에서 탐지된 시나리오 | 6 / 6 |
-| Sigma 규칙 | 6개 valid |
+| 양쪽 IDS에서 탐지된 시나리오 | 8 / 8 |
+| Sigma 규칙 | 8개 valid |
 | Python 테스트 | 23개 통과 |
-| 전체 coverage | 91% |
+| 전체 coverage | 93% |
 
 이 수치는 로컬 회귀 fixture 결과다. “운영 환경 공격 탐지 정확도 100%”로 일반화하면 안 된다.
 
@@ -68,7 +68,7 @@ suricata:
 
 캡처 단계와 분석 단계를 분리하면 같은 PCAP을 두 엔진이 읽는다. 입력 차이가 없어 규칙 결과만 비교할 수 있고, 분석 컨테이너가 외부 통신을 할 이유도 없다.
 
-## 2. 시나리오를 6개로 확장했다
+## 2. 시나리오를 기업·차량 네트워크 8개로 확장했다
 
 모든 트래픽은 격리 컨테이너의 고정 IP만 대상으로 한다.
 
@@ -79,6 +79,8 @@ tcp_syn_scan       제한된 TCP SYN scan
 brute_force        반복 HTTP Basic 인증
 dns_tunneling      긴 subdomain DNS query
 web_exploit        SQL injection 형태 query
+doip_unauthorized_diagnostic  DoIP 진단 메시지와 UDS 쓰기 명령
+someip_service_discovery      SOME/IP-SD FindService 메시지
 ```
 
 트래픽 생성기는 한 파일에 모았다.
@@ -86,6 +88,8 @@ web_exploit        SQL injection 형태 query
 ```powershell
 docker compose exec -T kali sh /lab/generate-traffic.sh
 ```
+
+차량 시나리오는 실제 ECU를 공격하지 않고 `10.77.0.30`의 격리 Gateway 시뮬레이터에 공개 프로토콜 구조를 본뜬 합성 바이트만 보낸다. Wireshark는 DoIP를 직접 해석할 수 있으며 SOME/IP는 UDP 30490을 디코더에 지정해 확인할 수 있다.
 
 시나리오 이름, Snort SID, Suricata SID, ATT&CK 정보는 `detection/rule-catalog.json`을 단일 기준으로 사용한다.
 
@@ -151,7 +155,7 @@ Python 파이프라인은 둘을 다음 공통 구조로 바꾼다.
 
 ## 4. 엔진 간 탐지 결과를 자동 비교했다
 
-비교기는 catalog의 6개 시나리오를 기준으로 엔진별 경보 수를 계산한다.
+비교기는 catalog의 8개 시나리오를 기준으로 엔진별 경보 수를 계산한다.
 
 ```powershell
 .\scripts\run-comparison.ps1
@@ -194,7 +198,7 @@ python -m forensics.cli verify-fixture `
 현재 SHA-256은 다음과 같다.
 
 ```text
-93160865ac7136c6f609e8c72a4940326e4c0ec22c16b9ab18f3463d09ae82f0
+8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e
 ```
 
 ## 6. ATT&CK과 Sigma를 연결했다
@@ -274,7 +278,7 @@ Kibana 공식 API로 다음을 자동화했다.
 fixture가 유효하다는 조건과 특정 캡처 결과를 구분했다.
 
 - 테스트: packet count가 0보다 크고 parser byte 수가 hash 검증 byte 수와 일치
-- evidence: 해당 실행의 정확한 159 packets 기록
+- evidence: 해당 실행의 정확한 168 packets 기록
 
 ## 9. GitHub Actions에서 실제 IDS를 다시 돌린다
 

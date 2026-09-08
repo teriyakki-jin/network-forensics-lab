@@ -42,7 +42,102 @@ class ForensicsCliTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
-        self.assertEqual(payload["valid_rules"], 6)
+        self.assertEqual(payload["valid_rules"], 8)
+
+    def test_build_case_writes_manifest_and_timeline(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            evidence = root / "evidence"
+            evidence.mkdir()
+            pcap = evidence / "capture.pcap"
+            alerts = evidence / "alerts.jsonl"
+            pcap.write_bytes(b"fixture")
+            alerts.write_text(
+                json.dumps(
+                    {
+                        "@timestamp": "2026-09-08T06:00:00Z",
+                        "engine": "snort",
+                        "scenario": "doip_unauthorized_diagnostic",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            manifest = evidence / "case-manifest.json"
+            timeline = evidence / "incident-timeline.json"
+
+            result = _run_cli(
+                "build-case",
+                "--case-id",
+                "NF-AUTO-LAB",
+                "--evidence-root",
+                str(evidence),
+                "--artifact",
+                str(pcap),
+                "--artifact",
+                str(alerts),
+                "--normalised",
+                str(alerts),
+                "--acquired-at",
+                "2026-09-08T06:00:00Z",
+                "--sensor-id",
+                "sensor-vehicle-gateway",
+                "--tool-version",
+                "snort=3",
+                "--manifest",
+                str(manifest),
+                "--timeline",
+                str(timeline),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            manifest_payload = json.loads(manifest.read_text(encoding="utf-8"))
+            timeline_payload = json.loads(timeline.read_text(encoding="utf-8"))
+
+        self.assertEqual(manifest_payload["case_id"], "NF-AUTO-LAB")
+        self.assertEqual(len(manifest_payload["artifacts"]), 2)
+        self.assertEqual(timeline_payload["events"][0]["sequence"], 1)
+
+    def test_evaluate_writes_scenario_level_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            alerts = root / "alerts.jsonl"
+            truth = root / "ground-truth.json"
+            output = root / "metrics.json"
+            alerts.write_text(
+                json.dumps({"engine": "snort", "scenario": "attack-a"}) + "\n",
+                encoding="utf-8",
+            )
+            truth.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "scenarios": [
+                            {"scenario": "attack-a", "label": "attack"},
+                            {"scenario": "normal-a", "label": "benign"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = _run_cli(
+                "evaluate",
+                "--alerts",
+                str(alerts),
+                "--ground-truth",
+                str(truth),
+                "--engine",
+                "snort",
+                "--output",
+                str(output),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["confusion_matrix"], {"tp": 1, "fp": 0, "fn": 0, "tn": 1})
+        self.assertEqual(payload["metrics"]["recall"], 1.0)
 
     def test_compare_writes_normalised_records_and_report(self) -> None:
         snort = {

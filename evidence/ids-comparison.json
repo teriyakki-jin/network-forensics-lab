@@ -22,9 +22,22 @@
       "delta": 0,
       "detected_by_both": true,
       "scenario": "dns_tunneling",
-      "snort_alerts": 5,
-      "suricata_alerts": 5,
+      "snort_alerts": 4,
+      "suricata_alerts": 4,
       "title": "LAB DNS Tunneling Pattern"
+    },
+    {
+      "attack": {
+        "tactic": "Execution",
+        "technique_id": "T1692.001",
+        "technique_name": "Unauthorized Message: Command Message"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "doip_unauthorized_diagnostic",
+      "snort_alerts": 1,
+      "suricata_alerts": 1,
+      "title": "LAB DoIP Unauthorized Diagnostic Session"
     },
     {
       "attack": {
@@ -48,9 +61,22 @@
       "delta": 0,
       "detected_by_both": true,
       "scenario": "icmp_echo",
-      "snort_alerts": 4,
-      "suricata_alerts": 4,
+      "snort_alerts": 3,
+      "suricata_alerts": 3,
       "title": "LAB ICMP Echo Request"
+    },
+    {
+      "attack": {
+        "tactic": "Discovery",
+        "technique_id": "T0846.003",
+        "technique_name": "Remote System Discovery: Multicast Discovery"
+      },
+      "delta": 0,
+      "detected_by_both": true,
+      "scenario": "someip_service_discovery",
+      "snort_alerts": 1,
+      "suricata_alerts": 1,
+      "title": "LAB SOME/IP Unauthorized Service Discovery"
     },
     {
       "attack": {

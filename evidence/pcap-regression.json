@@ -1,19 +1,19 @@
 {
   "integrity": {
-    "actual": "93160865ac7136c6f609e8c72a4940326e4c0ec22c16b9ab18f3463d09ae82f0",
+    "actual": "8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e",
     "algorithm": "sha256",
-    "bytes": 16025,
-    "expected": "93160865ac7136c6f609e8c72a4940326e4c0ec22c16b9ab18f3463d09ae82f0",
+    "bytes": 16756,
+    "expected": "8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e",
     "matches": true,
     "path": "lab-traffic.pcap"
   },
   "pcap": {
-    "captured_bytes": 13457,
-    "file_bytes": 16025,
+    "captured_bytes": 14044,
+    "file_bytes": 16756,
     "format": "pcap",
     "link_type": 1,
-    "original_bytes": 13457,
-    "packets": 159,
+    "original_bytes": 14044,
+    "packets": 168,
     "path": "lab-traffic.pcap",
     "snaplen": 262144,
     "timestamp_precision": "microseconds",

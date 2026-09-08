@@ -2,7 +2,7 @@
 
 ## 1. 문제 정의
 
-네트워크 보안 도구를 각각 설치하는 것만으로는 “같은 패킷이 서로 다른 IDS에서 어떻게 탐지되고, 그 결과를 어떻게 신뢰할 수 있는가”를 설명하기 어렵습니다. 이 프로젝트의 목표는 공격 트래픽 생성, 증거 보존, 다중 IDS 탐지, 표준 매핑, 검색·시각화를 하나의 반복 가능한 흐름으로 연결하는 것이었습니다.
+네트워크 보안 도구를 각각 설치하는 것만으로는 “기업·생산·차량 네트워크에서 같은 패킷이 서로 다른 IDS에 어떻게 탐지되고, 그 결과를 어떻게 신뢰할 수 있는가”를 설명하기 어렵습니다. 이 프로젝트의 목표는 공격 트래픽 생성, 증거 보존, 다중 IDS 탐지, 표준 매핑, 사건 타임라인, 검색·시각화를 하나의 반복 가능한 흐름으로 연결하는 것이었습니다.
 
 핵심 질문은 다음과 같습니다.
 
@@ -17,13 +17,14 @@
 | 영역 | 구현 |
 |---|---|
 | 격리망 | Docker `internal: true`, `10.77.0.0/24`, 고정 IP |
-| 테스트 트래픽 | ICMP, admin probe, SYN scan, brute force, DNS tunneling pattern, SQLi probe |
-| 증거 수집 | Kali `tcpdump`, PCAP SHA-256, binary header 검사 |
+| 테스트 트래픽 | 기존 6종 + 합성 DoIP 진단 명령, SOME/IP-SD 서비스 탐색 |
+| 차량 Gateway | 격리 TCP 13400·UDP 30490 응답 시뮬레이터 |
+| 증거 수집 | Kali `tcpdump`, PCAP SHA-256, binary header, artifact manifest |
 | 탐지 | Snort 3·Suricata 8 동일 PCAP 오프라인 분석 |
 | 정규화 | Python 공통 이벤트 스키마, 민감 인증 원문 제외 |
-| 표준 매핑 | MITRE ATT&CK catalog, 시나리오별 Sigma 규칙 |
+| 표준 매핑 | MITRE ATT&CK·ATT&CK for ICS catalog, 시나리오별 Sigma 규칙 |
 | 분석 | Logstash, Elasticsearch, Kibana Lens dashboard as code |
-| 자동화 | 1-command PowerShell runner, GitHub Actions PCAP regression |
+| 자동화 | 1-command PowerShell runner, 사건 타임라인, GitHub Actions PCAP regression |
 
 ## 3. 보안 경계
 
@@ -73,15 +74,16 @@ HTTP Basic 인증 원문처럼 자격 증명이 포함될 수 있는 payload는 
 
 | 항목 | 결과 |
 |---|---:|
-| PCAP packets | 159 |
-| PCAP bytes | 16,025 |
+| PCAP packets | 168 |
+| PCAP bytes | 16,756 |
 | Snort alerts | 45 |
 | Suricata alerts | 45 |
-| 양쪽 엔진에서 탐지된 시나리오 | 6 / 6 |
+| 양쪽 엔진에서 탐지된 시나리오 | 8 / 8 |
 | 시나리오별 alert delta | 모두 0 |
-| Sigma rules | 6 valid |
-| Python tests | 23 passed |
-| 전체 coverage | 91% |
+| Sigma rules | 8 valid |
+| 사건 증거 | 5 artifacts hashed, 90 timeline events |
+| Python tests | 34 passed |
+| 전체 coverage | 93% |
 
 이 결과는 로컬 회귀 fixture에 한정됩니다. 운영망 전체의 탐지율이나 오탐률로 일반화하지 않습니다.
 
@@ -136,10 +138,12 @@ Kibana는 최초 실행 때 플러그인과 saved object migration에 시간이 
 구현은 다음 RED → GREEN 순서로 진행했습니다.
 
 1. 공통 이벤트와 비교 결과에 대한 단위 테스트
-2. CLI fixture, Sigma 검증 테스트
-3. Compose 격리, 이미지 고정, rule coverage 계약 테스트
-4. Elasticsearch readiness와 정확한 index delete 계약 테스트
-5. Kibana Lens dashboard/capture 계약 테스트
+2. 시나리오 단위 confusion matrix와 증거 경계 검증
+3. 사건 manifest 및 타임라인 CLI 테스트
+4. CLI fixture, Sigma 검증 테스트
+5. Compose 격리, 이미지 고정, rule coverage 계약 테스트
+6. Elasticsearch readiness와 정확한 index delete 계약 테스트
+7. Kibana Lens dashboard/capture 계약 테스트
 
 GitHub Actions는 실제 Snort·Suricata 컨테이너를 실행해 커밋된 PCAP을 다시 분석합니다. Python 테스트만 통과하고 IDS 규칙이 깨지는 상황을 막기 위한 회귀 게이트입니다.
 
@@ -172,3 +176,4 @@ Threat fixture
 - IDS는 오프라인 탐지이며 IPS 차단을 수행하지 않습니다.
 - 다음 확장 시 실제 공개 PCAP corpus와 benign baseline을 분리해 precision/recall을 측정할 수 있습니다.
 - 대규모 evidence는 Git LFS 또는 object storage와 chain-of-custody metadata가 필요합니다.
+- 정상 전용 fixture를 분리하기 전에는 FPR·precision을 제시하지 않습니다.
