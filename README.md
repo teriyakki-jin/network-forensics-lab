@@ -1,4 +1,4 @@
-# Automotive & Manufacturing Network Forensics Lab
+# Automotive Ethernet Network Forensics Lab
 
 ![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Kali Linux](https://img.shields.io/badge/Kali-Linux-557C94?logo=kalilinux&logoColor=white)

@@ -187,7 +187,7 @@ class AutomationContractTests(unittest.TestCase):
     def test_kibana_setup_creates_repeatable_lens_dashboard(self) -> None:
         script = (ROOT / "scripts" / "setup-kibana.ps1").read_text(encoding="utf-8")
         self.assertIn("network-forensics-overview", script)
-        self.assertIn("Automotive & Manufacturing Network Forensics Lab", script)
+        self.assertIn("Automotive Ethernet Network Forensics Lab", script)
         self.assertIn("eight authorized enterprise and automotive", script)
         self.assertIn("/api/dashboards/$DashboardId", script)
         for field in (

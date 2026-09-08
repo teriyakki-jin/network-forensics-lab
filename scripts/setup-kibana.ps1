@@ -85,14 +85,14 @@ $DataSource = @{
 
 $DashboardId = 'network-forensics-overview'
 $Dashboard = @{
-    title  = 'Automotive & Manufacturing Network Forensics Lab'
+    title  = 'Automotive Ethernet Network Forensics Lab'
     panels = @(
         @{
             grid   = @{ x = 0; y = 0; w = 48; h = 4 }
             type   = 'markdown'
             config = @{
                 content = @'
-## Automotive & Manufacturing Network Forensics Lab
+## Automotive Ethernet Network Forensics Lab
 
 Cross-engine evidence for eight authorized enterprise and automotive scenarios in an isolated lab. DoIP and SOME/IP alerts are normalized and mapped to MITRE ATT&CK and ATT&CK for ICS.
 '@
