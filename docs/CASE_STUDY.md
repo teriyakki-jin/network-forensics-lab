@@ -1,183 +1,112 @@
-# Technical Case Study
+# 구현 사례: 자동차 Ethernet 네트워크 포렌식 랩
 
-## 1. 문제 정의
+## 시작한 이유
 
-네트워크 보안 도구를 각각 설치하는 것만으로는 “기업·생산·차량 네트워크에서 같은 패킷이 서로 다른 IDS에 어떻게 탐지되고, 그 결과를 어떻게 신뢰할 수 있는가”를 설명하기 어렵습니다. 이 프로젝트의 목표는 공격 트래픽 생성, 증거 보존, 다중 IDS 탐지, 표준 매핑, 사건 타임라인, 검색·시각화를 하나의 반복 가능한 흐름으로 연결하는 것이었습니다.
+처음에는 Kali에서 트래픽을 만들고 Snort 경보를 Kibana에서 확인하는 정도의 실습이었다. 직접 실행해 보니 경보가 뜬다는 사실만으로는 설명하기 어려운 부분이 많았다. Snort의 판단이 맞는지 비교할 대상이 없었고, PCAP이 바뀌지 않았다는 근거도 부족했다. 규칙을 수정한 뒤 예전 시나리오가 계속 탐지되는지도 사람이 다시 확인해야 했다.
 
-핵심 질문은 다음과 같습니다.
+그래서 목표를 도구 설치가 아닌 검증 과정으로 바꿨다. 같은 PCAP을 Snort와 Suricata가 각각 분석하고, 결과를 같은 형식으로 정리한 다음, 원본부터 대시보드까지 다시 만들 수 있는 구조를 잡았다. 차량 네트워크 직무와 연결하기 위해 DoIP와 SOME/IP-SD 트래픽도 추가했다.
 
-- 실습 트래픽을 외부망과 확실히 분리할 수 있는가?
-- 같은 PCAP에 대한 Snort와 Suricata 결과를 동일 기준으로 비교할 수 있는가?
-- 원본 PCAP과 파생 증거가 서로 일치함을 자동 검증할 수 있는가?
-- ATT&CK, Sigma, Kibana를 코드로 재생성할 수 있는가?
-- 새 규칙이 기존 시나리오를 깨뜨리면 PR 단계에서 잡을 수 있는가?
+## 구성
 
-## 2. 최종 구현 범위
-
-| 영역 | 구현 |
+| 구분 | 구현 내용 |
 |---|---|
-| 격리망 | Docker `internal: true`, `10.77.0.0/24`, 고정 IP |
-| 테스트 트래픽 | 기존 6종 + 합성 DoIP 진단 명령, SOME/IP-SD 서비스 탐색 |
-| 차량 Gateway | 격리 TCP 13400·UDP 30490 응답 시뮬레이터 |
-| 증거 수집 | Kali `tcpdump`, PCAP SHA-256, binary header, artifact manifest |
-| 탐지 | Snort 3·Suricata 8 동일 PCAP 오프라인 분석 |
-| 정규화 | Python 공통 이벤트 스키마, 민감 인증 원문 제외 |
-| 표준 매핑 | MITRE ATT&CK·ATT&CK for ICS catalog, 시나리오별 Sigma 규칙 |
-| 분석 | Logstash, Elasticsearch, Kibana Lens dashboard as code |
-| 자동화 | 1-command PowerShell runner, 사건 타임라인, GitHub Actions PCAP regression |
-| 객관적 평가 | 공격·정상 paired fixture, 5회 반복, scenario-level confusion matrix |
+| 격리망 | Docker 내부망 `10.77.0.0/24`, 고정 IP 사용 |
+| 트래픽 생성 | Kali에서 허가된 공격·정상 시나리오 실행 |
+| 차량 구간 | DoIP TCP 13400, SOME/IP-SD UDP 30490 시뮬레이터 |
+| 증거 수집 | `tcpdump` PCAP, SHA-256, 사건 manifest와 타임라인 |
+| 탐지 | Snort 3와 Suricata 8의 오프라인 분석 |
+| 데이터 정리 | 두 엔진의 경보를 공통 JSON 형식으로 변환 |
+| 표준 연결 | MITRE ATT&CK, ATT&CK for ICS, Sigma 규칙 |
+| 조회 | Logstash, Elasticsearch, Kibana Lens |
+| 회귀 검사 | Python 테스트와 GitHub Actions |
 
-## 3. 보안 경계
-
-### 공격망
-
-Kali, Nginx victim, CoreDNS는 외부 라우팅이 없는 `lab_net`에서만 통신합니다. 공격 시나리오는 `10.77.0.10`과 `10.77.0.53`만 대상으로 삼습니다.
-
-### 분석 경계
-
-Snort와 Suricata는 `network_mode: none`으로 실행됩니다. 두 엔진은 캡처가 끝난 PCAP만 읽으므로 분석 단계에서 외부 네트워크 접근이 필요하지 않습니다.
-
-### 관리 인터페이스
-
-Elasticsearch와 Kibana 포트는 `127.0.0.1`에만 바인딩합니다. 인증을 비활성화한 로컬 랩이므로 외부 인터페이스 노출을 허용하지 않습니다.
-
-## 4. 탐지 모델
-
-`detection/rule-catalog.json`을 규칙 메타데이터의 단일 기준으로 사용합니다.
+공격 트래픽은 `internal: true`로 설정한 Docker 네트워크 밖으로 나갈 수 없다. Snort와 Suricata 컨테이너에는 네트워크 인터페이스도 주지 않았다. 캡처가 끝난 PCAP만 읽게 해 분석 중 외부 통신 가능성을 줄이고, 두 엔진의 입력도 같게 만들었다.
 
 ```text
-scenario
-  ├─ Snort SID
-  ├─ Suricata SID
-  ├─ title
-  └─ ATT&CK tactic / technique
+Kali 10.77.0.20
+  ├─ Nginx 10.77.0.10
+  ├─ CoreDNS 10.77.0.53
+  └─ Vehicle Gateway 10.77.0.30
+          ↓ tcpdump
+       동일 PCAP
+        ├─ Snort 3
+        └─ Suricata 8
+              ↓
+       정규화 → Elastic → Kibana
 ```
 
-Python 정규화기는 엔진별 원본을 다음 공통 필드로 변환합니다.
+## 차량 네트워크 시나리오
+
+기존의 ICMP, HTTP 관리 경로 접근, SYN scan, Basic 인증 반복, DNS 터널 형태, SQL injection 형태 요청에 두 가지 차량 Ethernet 시나리오를 더했다.
+
+- DoIP: UDS `WriteDataByIdentifier(0x2E)`가 들어 있는 진단 메시지
+- SOME/IP-SD: 허가되지 않은 `FindService` 메시지
+
+실제 ECU나 차량에는 연결하지 않는다. 공개된 프로토콜 구조를 참고해 만든 바이트를 격리된 Gateway 시뮬레이터로 보낸다. 정상 fixture에서는 DoIP `ReadDataByIdentifier(0x22)`와 SOME/IP-SD `OfferService`를 사용해 공격 트래픽과 짝을 맞췄다.
+
+## 서로 다른 IDS 결과 맞추기
+
+Snort와 Suricata는 필드 이름과 시간 형식이 다르다. 두 원본을 바로 Elasticsearch에 넣으면 같은 시나리오도 별개의 데이터처럼 보인다. Python 정규화기에서 다음 필드만 공통 형식으로 만들었다.
 
 ```text
 @timestamp
 engine
 scenario
-source.ip / source.port
-destination.ip / destination.port
+source / destination
 network.transport
-rule.id / rule.description
-threat.tactic.name
-threat.technique.id / threat.technique.name
+rule
+threat.tactic / threat.technique
 ```
 
-HTTP Basic 인증 원문처럼 자격 증명이 포함될 수 있는 payload는 정규화 증거에 복사하지 않습니다.
+SID와 ATT&CK 정보는 `detection/rule-catalog.json` 한 곳에서 관리한다. 정규화기는 SID로 catalog를 조회해 두 엔진에 같은 시나리오 이름과 ATT&CK 정보를 붙인다. Basic 인증 헤더처럼 자격 증명이 포함될 수 있는 원문 payload는 결과 JSON에 복사하지 않았다.
 
-## 5. 실제 검증 결과
+## 작업 중 해결한 문제
 
-현재 커밋 fixture 결과:
+### Elasticsearch는 실행 중이어도 바로 준비되지 않았다
+
+컨테이너 상태가 `running`으로 바뀐 직후 인덱스 API를 호출하면 연결이 끊길 때가 있었다. JVM과 REST API 초기화가 끝나지 않은 상태였다. 이후 `/_cluster/health?wait_for_status=yellow` 응답을 확인한 뒤 인덱스 작업을 시작하도록 순서를 바꿨다.
+
+### wildcard 인덱스 삭제가 막혔다
+
+Elasticsearch 9에서는 `DELETE /ids-alerts-*` 요청이 안전 설정에 걸렸다. `_cat/indices`로 대상 이름을 먼저 읽고, `ids-alerts-` 접두사를 다시 확인한 뒤 정확한 인덱스만 하나씩 삭제하도록 수정했다. 삭제 범위도 이전보다 분명해졌다.
+
+### ICMP 규칙의 경계값에서 결과가 흔들렸다
+
+정상 ping과 공격 ping을 나누기 위해 ICMP 규칙에 임계치를 넣었는데, 공격 fixture도 임계치와 같은 3회로 설정해 실행 조건에 따라 경보가 달라졌다. 정상은 1회, 공격은 4회로 간격을 벌린 뒤 5회 반복 분석으로 결과가 고정되는지 확인했다.
+
+### 패킷 수를 테스트에 고정하면 정상 변경도 실패했다
+
+초기 테스트에는 예전 PCAP의 패킷 수가 그대로 들어 있었다. 시나리오를 추가하자 정상적인 변경인데도 테스트가 깨졌다. 테스트는 PCAP 구조와 계산된 파일 크기의 일치 여부를 검사하고, 실행별 패킷 수와 해시는 증거 JSON에 남기는 방식으로 역할을 나눴다.
+
+## 확인한 결과
+
+메인 공격 PCAP과 공격·정상 paired fixture를 따로 평가했다.
 
 | 항목 | 결과 |
 |---|---:|
-| PCAP packets | 170 |
-| PCAP bytes | 16,984 |
-| Snort alerts | 43 |
-| Suricata alerts | 43 |
-| 양쪽 엔진에서 탐지된 시나리오 | 8 / 8 |
-| 시나리오별 alert delta | 모두 0 |
-| Sigma rules | 8 valid |
-| paired fixture | 고유 공격 8 + 정상 8, 5회 반복 |
-| Snort / Suricata confusion matrix | 각각 TP 40, TN 40, FP 0, FN 0 |
-| recall / precision / FPR | 두 엔진 각각 100% / 100% / 0% |
-| 반복 성공 | 두 엔진 각각 5/5 |
-| 사건 증거 | 5 artifacts hashed, 86 timeline events |
-| Python tests | 40 passed |
-| 전체 coverage | 92% |
+| 메인 PCAP | 170 packets, 16,984 bytes |
+| Snort / Suricata 경보 | 각각 43건 |
+| 양쪽 엔진에서 탐지한 공격 시나리오 | 8 / 8 |
+| 시나리오별 두 엔진 경보 수 차이 | 0 |
+| paired fixture | 공격 8개 + 정상 8개 |
+| 반복 횟수 | 5회 |
+| 엔진별 confusion matrix | TP 40, TN 40, FP 0, FN 0 |
+| 엔진별 recall / precision / FPR | 100% / 100% / 0% |
+| 반복 성공 | Snort 5/5, Suricata 5/5 |
+| 자동 테스트 | 40개 통과, branch coverage 포함 92% |
 
-이 결과는 로컬 paired synthetic fixture에 한정됩니다. 엔진별 80 observations는 16개 고유 시나리오를 5회 반복한 값이며, 운영망 전체의 탐지율이나 오탐률로 일반화하지 않습니다.
+여기서 엔진별 관측값 80개는 서로 다른 시나리오 80개가 아니다. 공격 8개와 정상 8개를 5회 반복한 결과다. 따라서 이 수치는 저장소에 포함된 로컬 합성 fixture의 회귀 결과로만 사용한다. 실제 차량이나 운영망에서 탐지율 100%를 달성했다는 뜻은 아니다.
 
-## 6. 해결한 통합 장애
+## 자동 검증
 
-### Elasticsearch 시작 경합
+GitHub Actions에서는 Python 테스트만 실행하지 않는다. 커밋된 PCAP의 해시와 구조를 확인하고, Snort와 Suricata 컨테이너로 실제 재분석한다. 공격·정상 fixture도 5회 돌려 recall, precision, FPR과 반복 성공 여부가 기존 결과에서 벗어나지 않는지 검사한다.
 
-`docker compose up -d`는 컨테이너 프로세스가 시작됐음을 의미할 뿐 REST API 준비를 보장하지 않았습니다. 최초 실행에서 인덱스 삭제 요청이 JVM 부팅보다 먼저 도착해 연결이 닫혔습니다.
+이 구조 덕분에 규칙 문법은 맞지만 실제 패킷을 놓치는 변경, SID와 ATT&CK 정보가 어긋나는 변경, 정상 트래픽에서 새 경보가 생기는 변경을 PR 단계에서 확인할 수 있다.
 
-해결:
+## 남은 한계
 
-- `/_cluster/health?wait_for_status=yellow`를 반복 확인
-- 제한 시간 내 준비되지 않으면 명시적 실패
-- 준비 확인 이후에만 인덱스 작업 수행
-
-### Elasticsearch 9 wildcard 삭제 차단
-
-Elasticsearch 9의 안전 설정은 `DELETE /ids-alerts-*`를 거부했습니다.
-
-해결:
-
-- `_cat/indices/ids-alerts-*`로 후보 조회
-- `ids-alerts-*` 접두사 재검증
-- URL encoding한 정확한 인덱스 이름만 개별 삭제
-
-이 방식은 편리한 wildcard 삭제보다 범위가 명확하고 안전합니다.
-
-### Kibana 초기화와 dashboard drift
-
-Kibana는 최초 실행 때 플러그인과 saved object migration에 시간이 필요합니다. 수동으로 만든 화면은 다른 환경에서 재현되지 않았습니다.
-
-해결:
-
-- `/api/status`의 `available` 상태 대기
-- 데이터 뷰를 고정 ID `ids-alerts`로 생성
-- 공식 Dashboards API에 고정 ID `network-forensics-overview`로 upsert
-- metric, pie, data table Lens 패널을 코드로 선언
-- Headless Chrome으로 실제 렌더링을 확인한 후 README screenshot 생성
-
-### 변동 가능한 PCAP과 취약한 테스트
-
-초기 CLI 테스트는 패킷 수 `84`를 하드코딩했습니다. 새 시나리오를 추가해 PCAP을 다시 만들자 정상 변경인데도 테스트가 실패했습니다.
-
-해결:
-
-- 특정 패킷 수 대신 `packets > 0` 검증
-- PCAP parser가 계산한 파일 크기와 hash 검증기의 byte 수 일치 확인
-- 상세 수치는 생성된 evidence JSON에서 기록
-
-## 7. TDD와 품질 게이트
-
-구현은 다음 RED → GREEN 순서로 진행했습니다.
-
-1. 공통 이벤트와 비교 결과에 대한 단위 테스트
-2. 시나리오 단위 confusion matrix와 증거 경계 검증
-3. 사건 manifest 및 타임라인 CLI 테스트
-4. CLI fixture, Sigma 검증 테스트
-5. Compose 격리, 이미지 고정, rule coverage 계약 테스트
-6. Elasticsearch readiness와 정확한 index delete 계약 테스트
-7. Kibana Lens dashboard/capture 계약 테스트
-
-GitHub Actions는 실제 Snort·Suricata 컨테이너를 실행해 커밋된 PCAP을 다시 분석합니다. Python 테스트만 통과하고 IDS 규칙이 깨지는 상황을 막기 위한 회귀 게이트입니다.
-
-## 8. 포트폴리오 관점의 차별성
-
-이 프로젝트의 핵심은 도구 수가 아니라 증거의 연결성입니다.
-
-```text
-Threat fixture
-  → immutable PCAP check
-  → two IDS engines
-  → normalized events
-  → ATT&CK + Sigma
-  → Elastic evidence
-  → CI regression
-```
-
-따라서 “Snort를 설치했다”보다 다음 역량을 보여 줍니다.
-
-- 안전한 테스트 경계 설계
-- 엔진별 데이터 모델 통합
-- 디지털 증거 무결성 검증
-- detection-as-code와 dashboard-as-code
-- 실패 조건을 자동화 계약으로 전환하는 디버깅
-
-## 9. 한계와 다음 연구 주제
-
-- 소규모 합성 fixture의 FPR·recall이며 실제망의 트래픽 다양성이나 처리량을 측정하지 않습니다.
-- 암호화 트래픽 복호화와 TLS inspection은 범위 밖입니다.
-- IDS는 오프라인 탐지이며 IPS 차단을 수행하지 않습니다.
-- 다음 확장 시 공개 automotive PCAP corpus와 더 다양한 benign baseline으로 외적 타당성을 높일 수 있습니다.
-- 대규모 evidence는 Git LFS 또는 object storage와 chain-of-custody metadata가 필요합니다.
+- 정상 fixture가 작아 실제 업무 트래픽의 다양성을 대표하지 못한다.
+- DoIP와 SOME/IP-SD 메시지는 학습용 합성 데이터이며 ECU 동작을 재현하지 않는다.
+- 암호화 트래픽 복호화와 TLS inspection은 다루지 않았다.
+- IDS는 저장된 PCAP을 분석하며 인라인 차단 성능은 평가하지 않았다.
+- 다음 검증에는 공개 automotive PCAP과 장시간 정상 baseline이 필요하다.

@@ -1,69 +1,63 @@
 # 자동차 Ethernet 네트워크 포렌식 위협 모델
 
-## 목적과 범위
+## 범위
 
-이 문서는 기업 IT, 생산 OT, 차량 Ethernet 사이에서 발생할 수 있는 네트워크 침해 징후를 안전한 로컬 fixture로 재현하기 위한 모델입니다. 실제 현대모비스 네트워크나 차량 구조를 복제하지 않으며, 특정 기업의 내부 통제를 추정하지 않습니다.
+이 랩은 기업 IT 구간에서 시작된 이상 행위와 차량 Ethernet 구간의 비인가 진단·서비스 탐색을 한 환경에서 분석하기 위해 만들었다. 실제 기업망이나 차량을 복제하지 않으며, 모든 트래픽은 `10.77.0.0/24` Docker 내부망에서만 발생한다.
 
-프로젝트가 검증하는 질문은 다음과 같습니다.
+확인하려는 내용은 네 가지다.
 
-- 기업망에서 시작된 탐색 행위가 생산·차량 네트워크 경계로 이동하는 흐름을 식별할 수 있는가?
-- 비인가 DoIP 진단 명령과 SOME/IP 서비스 탐색을 PCAP에서 재현할 수 있는가?
-- 서로 다른 IDS 결과를 동일 사건·시나리오 기준으로 비교할 수 있는가?
-- 원본과 파생 증거의 무결성 및 수집 맥락을 자동으로 보존할 수 있는가?
+- 네트워크 탐색과 인증 반복 같은 선행 징후를 PCAP에 남길 수 있는가
+- DoIP 진단 명령과 SOME/IP-SD 탐색을 두 IDS가 같은 시나리오로 식별하는가
+- 원본 PCAP과 분석 결과가 바뀌지 않았음을 해시로 확인할 수 있는가
+- 정상 트래픽을 함께 분석했을 때 같은 규칙이 불필요한 경보를 만들지 않는가
 
-## 자산과 신뢰 경계
+## 자산과 경계
 
-| 자산 | 실습 구성 | 주요 보안 속성 |
+| 자산 | 랩 구성 | 확인할 사항 |
 |---|---|---|
-| 엔지니어링 단말 | Kali traffic generator | 명령 주체 식별, 허가된 목적지 제한 |
-| 기업 웹 서비스 | Nginx victim | 인증, 입력 검증, 접근 기록 |
-| 이름 해석 서비스 | CoreDNS | 비정상 query 식별 |
-| 차량 Gateway | Python TCP/UDP simulator | 진단 주체 인증, 허용 서비스 제한 |
-| 원본 증거 | `lab-traffic.pcap` | 무결성, 수집시각, 재현성 |
-| 탐지 증거 | Snort·Suricata alerts | 규칙 버전, 공통 스키마, 사건 연결성 |
+| 분석 단말 | Kali `10.77.0.20` | 목적지 제한, 명령 재현 가능성 |
+| 웹 서비스 | Nginx `10.77.0.10` | 관리 경로 접근, 인증 반복, 입력값 공격 |
+| DNS | CoreDNS `10.77.0.53` | 비정상 subdomain 질의 |
+| 차량 Gateway | Simulator `10.77.0.30` | DoIP 진단 명령, SOME/IP-SD 탐색 |
+| 원본 증거 | PCAP과 SHA-256 | 무결성, 수집 시각, 파일 구조 |
+| 파생 증거 | IDS 경보·타임라인 | 규칙 버전, 출처, 사건 연결 |
 
-공격 구성은 `10.77.0.0/24` Docker internal network 안에서만 실행됩니다. 차량 Gateway는 호스트 포트를 공개하지 않으며 Snort와 Suricata는 네트워크가 없는 컨테이너에서 PCAP만 분석합니다.
+`lab_net`은 `internal: true`로 설정했다. 차량 Gateway는 호스트 포트를 열지 않는다. Snort와 Suricata는 `network_mode: none` 상태에서 저장된 PCAP만 읽는다. Elasticsearch와 Kibana는 로컬 확인용이므로 `127.0.0.1`에만 바인딩한다.
 
-## 대표 공격 흐름
+## 시나리오 구성
 
 ```text
-엔지니어링 단말 탐색
-  → 웹 관리 경로 및 인증 시도
-  → DNS 터널 형태의 유출 징후
-  → 차량 Gateway DoIP 진단 명령
-  → SOME/IP 서비스 탐색
-  → IDS 교차 분석
-  → 사건 타임라인 및 증거 manifest
+ICMP·SYN 네트워크 탐색
+  → 웹 관리 경로 접근과 인증 반복
+  → DNS 터널 형태 질의
+  → DoIP 비인가 진단 명령
+  → SOME/IP-SD 서비스 탐색
+  → PCAP 보존과 IDS 교차 분석
 ```
 
-각 행위는 독립적인 합성 fixture입니다. 현재 버전은 실제 계정 탈취나 구간 간 침투 성공을 재현하지 않으므로 전체 흐름을 실제 causal attack chain으로 표현하지 않습니다.
+위 흐름은 분석 순서를 설명하기 위한 것이다. 각 트래픽은 독립된 합성 시나리오이며, 실제 계정 탈취나 IT 구간에서 차량 구간으로의 침투 성공을 재현한 공격 체인은 아니다.
 
-## 위협과 통제
+## 위협별 통제와 증거
 
-| 위협 | ATT&CK 관점 | 예방·탐지 통제 | 증거 |
+| 위협 | ATT&CK 기준 | 랩에서 적용한 통제 | 남는 증거 |
 |---|---|---|---|
-| 네트워크 탐색 | Enterprise T1046 | 세그멘테이션, IDS scan rule | SID 1000003 |
-| DNS 기반 유출 징후 | Enterprise T1071.004 | DNS monitoring, 긴 label 탐지 | SID 1000005 |
-| 비인가 DoIP 진단 명령 | ICS T1692.001 | 진단 주체 허용목록, command inspection | SID 1000007 |
-| SOME/IP 서비스 탐색 | ICS T0846.003 | 정적 통신 관계, discovery monitoring | SID 1000008 |
-| PCAP 또는 보고서 변조 | 증거 무결성 | SHA-256 artifact manifest | `case-manifest.json` |
+| TCP 서비스 탐색 | Enterprise T1046 | 격리망, SYN 임계치 규칙 | SID 1000003 경보와 PCAP |
+| DNS 기반 유출 징후 | Enterprise T1071.004 | 특정 query 형태 탐지 | SID 1000005 경보와 DNS packet |
+| 비인가 DoIP 진단 | ICS T1692.001 | UDS 서비스 바이트 검사 | SID 1000007 경보와 TCP 13400 packet |
+| SOME/IP-SD 탐색 | ICS T0846.003 | FindService entry 검사 | SID 1000008 경보와 UDP 30490 packet |
+| 증거 파일 변경 | 해당 없음 | SHA-256, artifact manifest | checksum과 `case-manifest.json` |
+| 규칙 변경 후 회귀 | 해당 없음 | 두 IDS 재분석, paired fixture 5회 평가 | CI 실행 결과와 metrics JSON |
 
-ATT&CK 매핑은 공격 행위 설명을 표준화하기 위한 것이며 UNECE R155 또는 ISO/SAE 21434 준수를 주장하지 않습니다.
+ATT&CK 표기는 탐지 의도를 설명하기 위한 분류다. 이 프로젝트만으로 UNECE R155나 ISO/SAE 21434 준수를 주장하지 않는다.
 
-## 증거 취급
+## 증거 처리
 
-`case-manifest.json`은 다음을 기록합니다.
+원본 PCAP은 분석 입력으로만 사용한다. Snort·Suricata 경보, 공통 형식으로 바꾼 JSON, 비교 보고서와 타임라인은 모두 파생 증거로 취급한다.
 
-- 사건번호 `NF-AUTO-LAB`
-- UTC 수집시각과 sensor ID
-- Snort·Suricata 버전
-- PCAP, checksum, 정규화 경보, 비교 결과, Sigma 검증 결과의 SHA-256
+`case-manifest.json`에는 사건번호, UTC 수집 시각, 센서 ID, 도구 버전과 주요 파일의 SHA-256이 들어간다. 공격·정상 평가용 PCAP에도 별도 checksum 파일을 둔다. `incident-timeline.json`은 두 엔진의 경보를 시간순으로 정렬한다.
 
-`incident-timeline.json`은 두 IDS의 정규화 이벤트를 시간순으로 정렬합니다. 원본 PCAP은 변경하지 않으며 모든 분석 결과는 파생 증거로 취급합니다.
+## 평가 범위
 
-## 현재 한계와 다음 검증
+현재 평가는 고유 공격 8개와 정상 8개를 각각 5회 분석한 결과다. 두 엔진 모두 TP 40, TN 40, FP 0, FN 0을 기록했다. recall 100%, precision 100%, FPR 0%는 이 fixture 안에서만 유효하다.
 
-- 고유 공격 8종과 paired 정상 8종을 5회 반복한 합성 PCAP 회귀이며 운영망 탐지 정확도가 아닙니다.
-- 로컬 fixture에서 두 엔진 모두 recall 100%, precision 100%, FPR 0%, 반복 성공 5/5를 기록했지만 정상 트래픽 다양성이 제한적입니다.
-- 차량 Gateway는 DoIP·SOME/IP 학습용 시뮬레이터이며 ECU 동작을 구현하지 않습니다.
-- 다음 단계에서는 공개 automotive PCAP과 장시간 benign baseline으로 외적 타당성과 처리 지연을 추가 측정합니다.
+정상 트래픽의 종류와 실행 시간이 작기 때문에 운영망 오탐률로 사용할 수 없다. 차량 Gateway도 프로토콜 학습용 시뮬레이터다. 다음 단계에서는 공개 automotive PCAP과 장시간 정상 트래픽을 추가해 규칙이 다른 환경에서도 유지되는지 확인해야 한다.
