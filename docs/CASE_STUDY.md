@@ -25,6 +25,7 @@
 | 표준 매핑 | MITRE ATT&CK·ATT&CK for ICS catalog, 시나리오별 Sigma 규칙 |
 | 분석 | Logstash, Elasticsearch, Kibana Lens dashboard as code |
 | 자동화 | 1-command PowerShell runner, 사건 타임라인, GitHub Actions PCAP regression |
+| 객관적 평가 | 공격·정상 paired fixture, 5회 반복, scenario-level confusion matrix |
 
 ## 3. 보안 경계
 
@@ -74,18 +75,22 @@ HTTP Basic 인증 원문처럼 자격 증명이 포함될 수 있는 payload는 
 
 | 항목 | 결과 |
 |---|---:|
-| PCAP packets | 168 |
-| PCAP bytes | 16,756 |
-| Snort alerts | 45 |
-| Suricata alerts | 45 |
+| PCAP packets | 170 |
+| PCAP bytes | 16,984 |
+| Snort alerts | 43 |
+| Suricata alerts | 43 |
 | 양쪽 엔진에서 탐지된 시나리오 | 8 / 8 |
 | 시나리오별 alert delta | 모두 0 |
 | Sigma rules | 8 valid |
-| 사건 증거 | 5 artifacts hashed, 90 timeline events |
-| Python tests | 34 passed |
-| 전체 coverage | 93% |
+| paired fixture | 고유 공격 8 + 정상 8, 5회 반복 |
+| Snort / Suricata confusion matrix | 각각 TP 40, TN 40, FP 0, FN 0 |
+| recall / precision / FPR | 두 엔진 각각 100% / 100% / 0% |
+| 반복 성공 | 두 엔진 각각 5/5 |
+| 사건 증거 | 5 artifacts hashed, 86 timeline events |
+| Python tests | 40 passed |
+| 전체 coverage | 92% |
 
-이 결과는 로컬 회귀 fixture에 한정됩니다. 운영망 전체의 탐지율이나 오탐률로 일반화하지 않습니다.
+이 결과는 로컬 paired synthetic fixture에 한정됩니다. 엔진별 80 observations는 16개 고유 시나리오를 5회 반복한 값이며, 운영망 전체의 탐지율이나 오탐률로 일반화하지 않습니다.
 
 ## 6. 해결한 통합 장애
 
@@ -171,9 +176,8 @@ Threat fixture
 
 ## 9. 한계와 다음 연구 주제
 
-- 소규모 합성 fixture이므로 실제망 FPR·recall·처리량을 측정하지 않습니다.
+- 소규모 합성 fixture의 FPR·recall이며 실제망의 트래픽 다양성이나 처리량을 측정하지 않습니다.
 - 암호화 트래픽 복호화와 TLS inspection은 범위 밖입니다.
 - IDS는 오프라인 탐지이며 IPS 차단을 수행하지 않습니다.
-- 다음 확장 시 실제 공개 PCAP corpus와 benign baseline을 분리해 precision/recall을 측정할 수 있습니다.
+- 다음 확장 시 공개 automotive PCAP corpus와 더 다양한 benign baseline으로 외적 타당성을 높일 수 있습니다.
 - 대규모 evidence는 Git LFS 또는 object storage와 chain-of-custody metadata가 필요합니다.
-- 정상 전용 fixture를 분리하기 전에는 FPR·precision을 제시하지 않습니다.

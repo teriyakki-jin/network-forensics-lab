@@ -22,3 +22,7 @@ docker-data/
 .edge-profile/
 .capture-profile*/
 .capture-debug/
+
+# Repeated evaluation intermediates; committed PCAPs and aggregate metrics remain evidence.
+alerts/evaluation/
+evidence/evaluation/run-*.json

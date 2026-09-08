@@ -52,6 +52,21 @@ jobs:
           docker compose --profile tools run --rm suricata
           ./scripts/run-comparison.ps1
 
+      - name: Run paired attack and benign fixture regression
+        shell: pwsh
+        run: |
+          ./scripts/run-evaluation.ps1 -UseCommittedFixtures
+          $metrics = Get-Content evidence/evaluation/detection-metrics.json -Raw | ConvertFrom-Json
+          foreach ($engine in @('snort', 'suricata')) {
+            $result = $metrics.engines.$engine
+            if ($result.repeatability -ne '5/5' -or
+                $result.metrics.recall -ne 1 -or
+                $result.metrics.precision -ne 1 -or
+                $result.metrics.false_positive_rate -ne 0) {
+              throw "Paired fixture regression failed for $engine"
+            }
+          }
+
       - name: Validate shell and Node scripts
         shell: bash
         run: |

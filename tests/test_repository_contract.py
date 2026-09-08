@@ -142,6 +142,31 @@ class AutomationContractTests(unittest.TestCase):
         self.assertIn("/dev/tcp/10.77.0.30/13400", script)
         self.assertIn("/dev/udp/10.77.0.30/30490", script)
         self.assertIn("ARS_AUTOMOTIVE_FIXTURE", script)
+        self.assertIn("ARS_BENIGN_FIXTURE", script)
+        self.assertIn("benign", script)
+
+    def test_ids_runners_accept_fixture_specific_inputs_and_outputs(self) -> None:
+        snort = (ROOT / "snort" / "run-snort.sh").read_text(encoding="utf-8")
+        suricata = (ROOT / "suricata" / "run-suricata.sh").read_text(encoding="utf-8")
+        for script in (snort, suricata):
+            self.assertIn("PCAP_FILE", script)
+            self.assertIn("OUTPUT_DIR", script)
+
+    def test_evaluation_script_uses_paired_fixtures_and_five_runs(self) -> None:
+        script = (ROOT / "scripts" / "run-evaluation.ps1").read_text(encoding="utf-8")
+        self.assertIn("attack-traffic.pcap", script)
+        self.assertIn("benign-traffic.pcap", script)
+        self.assertIn("RepeatCount = 5", script)
+        self.assertIn("ground-truth.json", script)
+        self.assertIn("aggregate-evaluations", script)
+        self.assertIn("UseCommittedFixtures", script)
+        self.assertIn("Get-FileHash", script)
+        self.assertIn(".sha256", script)
+
+    def test_workflow_runs_paired_fixture_regression(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding="utf-8")
+        self.assertIn("run-evaluation.ps1", workflow)
+        self.assertIn("UseCommittedFixtures", workflow)
 
     def test_run_script_waits_for_elasticsearch_before_using_index_api(self) -> None:
         script = (ROOT / "scripts" / "run-lab.ps1").read_text(encoding="utf-8")

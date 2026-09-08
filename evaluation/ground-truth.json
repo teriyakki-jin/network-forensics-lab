@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {"fixture_id": "attack", "scenario": "icmp_echo", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "http_admin_probe", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "tcp_syn_scan", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "brute_force", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "dns_tunneling", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "web_exploit", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "doip_unauthorized_diagnostic", "label": "attack"},
+    {"fixture_id": "attack", "scenario": "someip_service_discovery", "label": "attack"},
+    {"fixture_id": "benign", "scenario": "icmp_echo", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "http_admin_probe", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "tcp_syn_scan", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "brute_force", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "dns_tunneling", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "web_exploit", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "doip_unauthorized_diagnostic", "label": "benign"},
+    {"fixture_id": "benign", "scenario": "someip_service_discovery", "label": "benign"}
+  ]
+}

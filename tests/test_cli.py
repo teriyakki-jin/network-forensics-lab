@@ -180,13 +180,46 @@ class ForensicsCliTests(unittest.TestCase):
                 str(normalised),
                 "--report",
                 str(report),
+                "--fixture-id",
+                "attack",
             )
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(len(normalised.read_text(encoding="utf-8").splitlines()), 2)
             payload = json.loads(report.read_text(encoding="utf-8"))
+            records = [json.loads(line) for line in normalised.read_text(encoding="utf-8").splitlines()]
 
         self.assertEqual(payload["totals"], {"snort": 1, "suricata": 1})
+        self.assertEqual({record["fixture_id"] for record in records}, {"attack"})
+
+    def test_aggregate_evaluations_writes_repeated_run_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            inputs = []
+            for run_id in (1, 2):
+                path = root / f"run-{run_id}.json"
+                path.write_text(
+                    json.dumps(
+                        {
+                            "run_id": run_id,
+                            "engine": "snort",
+                            "confusion_matrix": {"tp": 8, "fp": 0, "fn": 0, "tn": 8},
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                inputs.extend(("--input", str(path)))
+            output = root / "aggregate.json"
+
+            result = _run_cli(
+                "aggregate-evaluations", *inputs, "--output", str(output)
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["scope"]["repeated_runs"], 2)
+        self.assertEqual(payload["engines"]["snort"]["observations"], 32)
 
 
 if __name__ == "__main__":

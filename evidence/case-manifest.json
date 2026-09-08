@@ -1,29 +1,29 @@
 {
   "acquisition": {
-    "acquired_at": "2026-09-08T07:17:03Z",
+    "acquired_at": "2026-09-08T10:59:04Z",
     "sensor_id": "sensor-vehicle-gateway",
     "timezone": "UTC"
   },
   "artifacts": [
     {
-      "bytes": 53561,
+      "bytes": 51191,
       "path": "alerts/normalized-alerts.jsonl",
-      "sha256": "72215f82149e71d9b4409db0b373dd1c7b658405f81433c027b009c7a0e0537d"
+      "sha256": "a85a77a661c69e1e5b4893567afbfc6da15b4986fdf3078a5cf66b94a2a732a4"
     },
     {
       "bytes": 3024,
       "path": "evidence/ids-comparison.json",
-      "sha256": "c35b8f629e843ed07d9979ce6b83ff7e12320d1a3b94f4b2cd8393403abbe5da"
+      "sha256": "3f07c163cd275e14c3d94dfafa296be4def455f58dfc299d312d9e5699c470a4"
     },
     {
-      "bytes": 16756,
+      "bytes": 16984,
       "path": "evidence/lab-traffic.pcap",
-      "sha256": "8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e"
+      "sha256": "78cb430a5760aeb276e27b149b2e18017c68aab414155bc2abe31778f64e6530"
     },
     {
       "bytes": 84,
       "path": "evidence/lab-traffic.pcap.sha256",
-      "sha256": "288fd993dbfcd82c7d311ef0875bc2989a9d714d7e985f8ca79181643d2c33fa"
+      "sha256": "e8dd96749263499576939e74db7b2d55dce518ec9807ea6aeb14aacd218a6b01"
     },
     {
       "bytes": 1913,

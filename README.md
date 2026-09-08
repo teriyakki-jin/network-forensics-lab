@@ -14,17 +14,19 @@ Docker 격리망에서 기업·생산·차량 Ethernet 침해 징후를 합성�
 
 ## 핵심 결과
 
-| 재현성 | 증거 | 탐지 범위 | 교차 검증 | 분석·자동화 |
+| 재현성 | 평가 범위 | Snort 3 | Suricata 8 | 분석·자동화 |
 |---|---:|---:|---:|---:|
-| 명령 1개 | PCAP 168 packets | 공격 시나리오 8개 | Snort 45 / Suricata 45 | 34 tests · 93% coverage |
+| 명령 1개 | 공격 8 + 정상 8 · 5회 | recall 100% · FPR 0% | recall 100% · FPR 0% | 40 tests · 92% coverage |
 
-- 동일 PCAP에서 두 IDS가 8개 시나리오를 모두 탐지했고 시나리오별 경보 수 차이는 `0`이었습니다.
+- 동일 공격 PCAP에서 두 IDS가 8개 시나리오를 모두 탐지했고 시나리오별 경보 수 차이는 `0`이었습니다.
+- 공격·정상 paired fixture를 5회 반복 분석한 로컬 회귀에서 두 엔진 모두 `TP 40 / TN 40 / FP 0 / FN 0`, 재현성 `5/5`를 기록했습니다.
+- 두 paired PCAP은 각각 SHA-256 checksum을 포함하며 CI에서 분석 전에 무결성을 재검증합니다.
 - 합성 DoIP 진단 명령과 SOME/IP 서비스 탐색을 실제 프로토콜 바이트로 생성하고 Wireshark에서 해석할 수 있습니다.
 - SHA-256, PCAP 구조, 패킷 수를 독립 Python 검증기로 확인합니다.
 - 8개 탐지를 MITRE ATT&CK 및 ATT&CK for ICS 기술과 Sigma 규칙에 연결했습니다.
 - `case-manifest.json`은 PCAP과 파생 증거 5개의 SHA-256·센서·수집시각·도구 버전을 기록합니다.
 - Docker 공격망은 `internal: true`, IDS 분석 컨테이너는 `network_mode: none`입니다.
-- 현재 테스트 스위트는 34개, branch coverage 포함 전체 커버리지는 93%입니다.
+- 현재 테스트 스위트는 40개, branch coverage 포함 전체 커버리지는 92%입니다.
 
 > 수치는 저장소에 포함된 로컬 회귀 fixture 결과입니다. 실제 운영망의 일반적인 탐지 정확도를 의미하지 않습니다.
 
@@ -65,7 +67,7 @@ flowchart LR
 
 | 시나리오 | 테스트 트래픽 | ATT&CK | Snort | Suricata |
 |---|---|---|---:|---:|
-| `icmp_echo` | ICMP echo request | T1018 Remote System Discovery | 3 | 3 |
+| `icmp_echo` | ICMP echo burst | T1018 Remote System Discovery | 1 | 1 |
 | `http_admin_probe` | `/admin?cmd=id` 접근 | T1190 Exploit Public-Facing Application | 1 | 1 |
 | `tcp_syn_scan` | 제한된 TCP SYN scan | T1046 Network Service Discovery | 33 | 33 |
 | `brute_force` | 반복 HTTP Basic 인증 | T1110 Brute Force | 1 | 1 |
@@ -73,7 +75,7 @@ flowchart LR
 | `web_exploit` | SQL injection 형태의 query | T1190 Exploit Public-Facing Application | 1 | 1 |
 | `doip_unauthorized_diagnostic` | DoIP 진단 메시지와 UDS 쓰기 명령 | T1692.001 Unauthorized Command Message | 1 | 1 |
 | `someip_service_discovery` | SOME/IP-SD FindService 메시지 | T0846.003 Multicast Discovery | 1 | 1 |
-| **합계** |  |  | **45** | **45** |
+| **합계** |  |  | **43** | **43** |
 
 각 시나리오는 다음 세 탐지 표현을 함께 가집니다.
 
@@ -90,6 +92,7 @@ flowchart LR
 | 테스트 트래픽의 외부 유출 | Docker internal network, 고정 사설 IP | [`compose.yaml`](compose.yaml) 계약 테스트 |
 | IDS별 형식 차이 | 공통 이벤트 스키마로 정규화 | [`alerts/normalized-alerts.jsonl`](alerts/normalized-alerts.jsonl) |
 | 단일 IDS 편향 | 동일 PCAP을 두 엔진으로 교차 분석 | [`evidence/ids-comparison.json`](evidence/ids-comparison.json) |
+| 공격만으로 인한 오탐 평가 부재 | 동일 8개 시나리오의 공격·정상 paired fixture를 5회 반복 | [`evidence/evaluation/detection-metrics.json`](evidence/evaluation/detection-metrics.json) |
 | PCAP 변조 | SHA-256 및 binary header 검사 | [`evidence/pcap-regression.json`](evidence/pcap-regression.json) |
 | 파생 증거 출처 불명 | 사건번호·센서·수집시각·도구 버전과 전체 artifact hash 기록 | [`evidence/case-manifest.json`](evidence/case-manifest.json) |
 | 경보의 시간적 맥락 유실 | 정규화 경보를 UTC 기준으로 정렬 | [`evidence/incident-timeline.json`](evidence/incident-timeline.json) |
@@ -131,6 +134,14 @@ Elastic Stack 없이 PCAP과 두 IDS만 검증하려면 다음 옵션을 사용�
 .\scripts\run-lab.ps1 -SkipElastic
 ```
 
+공격·정상 paired fixture를 생성하고 두 IDS를 5회 반복 평가하려면 다음 명령을 사용합니다.
+
+```powershell
+.\scripts\run-evaluation.ps1
+```
+
+커밋된 fixture만 다시 분석하려면 `-UseCommittedFixtures`를 추가합니다.
+
 ### 분석 화면
 
 - [Kibana Lens dashboard](http://127.0.0.1:5601/app/dashboards#/view/network-forensics-overview)
@@ -160,7 +171,7 @@ python -m forensics.cli validate-sigma --directory detection/sigma
 현재 fixture 무결성 값:
 
 ```text
-8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e
+78cb430a5760aeb276e27b149b2e18017c68aab414155bc2abe31778f64e6530
 ```
 
 ## Wireshark / tshark 분석
@@ -203,10 +214,10 @@ docker compose exec kali tshark -r /evidence/lab-traffic.pcap -d udp.port==30490
 ## 객관적 측정 원칙
 
 - 경보 개수는 탐지 정확도로 표현하지 않습니다.
-- 현재 결과는 커밋된 단일 합성 PCAP에서 8개 공격 시나리오가 양쪽 IDS에 검출됐다는 회귀 결과입니다.
-- 운영 환경의 recall·precision·FPR로 일반화하지 않습니다.
-- [`forensics/incident.py`](forensics/incident.py)는 공격·정상 ground truth가 분리된 fixture에 대해 시나리오 단위 confusion matrix를 계산하도록 준비되어 있습니다.
-- 다음 평가 단계에서는 공격 PCAP과 정상 PCAP을 분리하고 최소 5회 반복해 recall·precision·FPR 및 탐지 지연시간을 기록합니다.
+- 고유 시나리오는 공격 8개와 정상 8개이며, 반복 횟수는 5회입니다. 엔진별 80 observations를 80개의 고유 시나리오로 표현하지 않습니다.
+- 로컬 paired synthetic fixture에서 Snort와 Suricata 모두 recall `100%`, precision `100%`, FPR `0%`, 반복 성공 `5/5`를 기록했습니다.
+- 결과의 confusion matrix는 두 IDS 각각 `TP 40 / TN 40 / FP 0 / FN 0`입니다.
+- 이는 저장소의 제한된 합성 fixture에 대한 회귀 결과이며 운영 환경의 탐지 정확도로 일반화하지 않습니다.
 
 ## CI 품질 게이트
 
@@ -216,6 +227,7 @@ GitHub Actions는 push와 pull request마다 다음을 검증합니다.
 - PCAP SHA-256 및 구조 회귀 검사
 - 8개 Sigma 규칙의 필수 필드와 ATT&CK tag
 - 커밋된 PCAP에 대한 Snort·Suricata 오프라인 재분석
+- 커밋된 공격·정상 paired fixture 5회 분석과 recall·precision·FPR 회귀 검사
 - 두 엔진이 모든 시나리오를 탐지했는지 비교
 - Compose, Bash, Node.js, PowerShell 구문 검사
 - Actions SHA 고정 및 컨테이너 이미지 버전 정책
@@ -229,6 +241,7 @@ GitHub Actions는 push와 pull request마다 다음을 검증합니다.
 | 룰 카탈로그를 단일 기준으로 사용 | SID와 ATT&CK 매핑 드리프트 방지 | 룰 변경 시 catalog도 함께 갱신 필요 |
 | Lens API 기반 dashboard as code | 수동 UI 작업 없이 같은 화면 재현 | Kibana API 버전에 영향받음 |
 | 작은 결정적 fixture를 Git에 포함 | PR에서 빠른 회귀 검증 | 대규모 실제망 성능을 대표하지 않음 |
+| 공격·정상 시나리오를 같은 ID로 pairing | 규칙별 탐지와 비탐지를 같은 기준으로 평가 | 합성 정상 트래픽이 운영망 다양성을 대표하지 않음 |
 
 ## 디렉터리 구조
 
@@ -240,6 +253,7 @@ network-forensics-lab/
 ├─ detection/                 # 룰 catalog와 Sigma
 ├─ dns/                       # 격리망 CoreDNS
 ├─ evidence/                  # PCAP, hash, 비교·검증 결과
+├─ evaluation/                # paired fixture ground truth
 ├─ forensics/                 # 정규화·비교·무결성·사건 증거 Python package
 ├─ kali/                      # traffic generator image/script
 ├─ logstash/                  # IDS 공통 이벤트 ingestion

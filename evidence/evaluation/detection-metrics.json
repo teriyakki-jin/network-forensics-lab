@@ -1,0 +1,41 @@
+{
+  "engines": {
+    "snort": {
+      "confusion_matrix": {
+        "fn": 0,
+        "fp": 0,
+        "tn": 40,
+        "tp": 40
+      },
+      "metrics": {
+        "false_positive_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "observations": 80,
+      "repeatability": "5/5"
+    },
+    "suricata": {
+      "confusion_matrix": {
+        "fn": 0,
+        "fp": 0,
+        "tn": 40,
+        "tp": 40
+      },
+      "metrics": {
+        "false_positive_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "observations": 80,
+      "repeatability": "5/5"
+    }
+  },
+  "schema_version": 1,
+  "scope": {
+    "repeated_runs": 5,
+    "unique_attack_scenarios": 8,
+    "unique_benign_scenarios": 8
+  },
+  "unit": "paired_fixture_scenario_observation"
+}

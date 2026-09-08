@@ -23,16 +23,19 @@ Velog 태그: 네트워크보안, 디지털포렌식, Snort, Suricata, Wireshark
 
 | 항목 | 결과 |
 |---|---:|
-| 공격 시나리오 | 8개 |
-| PCAP | 168 packets / 16,756 bytes |
-| Snort 경보 | 45건 |
-| Suricata 경보 | 45건 |
+| 고유 평가 시나리오 | 공격 8개 + 정상 8개 |
+| 반복 평가 | 5회 |
+| PCAP | 170 packets / 16,984 bytes |
+| Snort 경보 | 43건 |
+| Suricata 경보 | 43건 |
 | 양쪽 IDS에서 탐지된 시나리오 | 8 / 8 |
+| Snort·Suricata recall / precision / FPR | 각각 100% / 100% / 0% |
+| Snort·Suricata 반복 성공 | 각각 5/5 |
 | Sigma 규칙 | 8개 valid |
-| Python 테스트 | 23개 통과 |
-| 전체 coverage | 93% |
+| Python 테스트 | 40개 통과 |
+| 전체 coverage | 92% |
 
-이 수치는 로컬 회귀 fixture 결과다. “운영 환경 공격 탐지 정확도 100%”로 일반화하면 안 된다.
+이 수치는 고유 공격 8개와 정상 8개를 5회 반복한 로컬 paired synthetic fixture 결과다. 엔진별 80 observations를 고유 시나리오 80개로 표현하거나 “운영 환경 공격 탐지 정확도 100%”로 일반화하면 안 된다.
 
 ![Kibana Lens 대시보드](../assets/kibana-lens-dashboard.png)
 
@@ -198,7 +201,7 @@ python -m forensics.cli verify-fixture `
 현재 SHA-256은 다음과 같다.
 
 ```text
-8070963872a0b5f1bba9ec10363639ff1b8243965918b09a9f121381697a559e
+78cb430a5760aeb276e27b149b2e18017c68aab414155bc2abe31778f64e6530
 ```
 
 ## 6. ATT&CK과 Sigma를 연결했다
@@ -278,7 +281,7 @@ Kibana 공식 API로 다음을 자동화했다.
 fixture가 유효하다는 조건과 특정 캡처 결과를 구분했다.
 
 - 테스트: packet count가 0보다 크고 parser byte 수가 hash 검증 byte 수와 일치
-- evidence: 해당 실행의 정확한 168 packets 기록
+- evidence: 해당 실행의 정확한 170 packets 기록
 
 ## 9. GitHub Actions에서 실제 IDS를 다시 돌린다
 

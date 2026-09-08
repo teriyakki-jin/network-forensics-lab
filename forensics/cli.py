@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-from .incident import build_case_manifest, build_timeline, evaluate_detection
+from .incident import aggregate_evaluations, build_case_manifest, build_timeline, evaluate_detection
 from .pipeline import (
     build_comparison,
     inspect_pcap,
@@ -55,6 +55,9 @@ def _compare(args: argparse.Namespace) -> dict[str, Any]:
         record = normalise_suricata(event, catalog)
         if record is not None:
             suricata_records.append(record)
+    if args.fixture_id:
+        for record in snort_records + suricata_records:
+            record["fixture_id"] = args.fixture_id
     report = build_comparison(snort_records, suricata_records, catalog)
     _write_jsonl(args.normalised, snort_records + suricata_records)
     _write_json(args.report, report)
@@ -130,6 +133,15 @@ def _evaluate(args: argparse.Namespace) -> dict[str, Any]:
     payload = evaluate_detection(
         _read_jsonl(args.alerts), ground_truth["scenarios"], engine=args.engine
     )
+    if args.run_id is not None:
+        payload["run_id"] = args.run_id
+    _write_json(args.output, payload)
+    return payload
+
+
+def _aggregate_evaluations(args: argparse.Namespace) -> dict[str, Any]:
+    reports = [json.loads(path.read_text(encoding="utf-8")) for path in args.input]
+    payload = aggregate_evaluations(reports)
     _write_json(args.output, payload)
     return payload
 
@@ -148,6 +160,7 @@ def build_parser() -> argparse.ArgumentParser:
     compare.add_argument("--suricata", type=_path, required=True)
     compare.add_argument("--normalised", type=_path, required=True)
     compare.add_argument("--report", type=_path, required=True)
+    compare.add_argument("--fixture-id")
     compare.set_defaults(handler=_compare)
 
     fixture = subparsers.add_parser("verify-fixture", help="verify PCAP integrity and structure")
@@ -181,8 +194,16 @@ def build_parser() -> argparse.ArgumentParser:
     evaluate.add_argument("--alerts", type=_path, required=True)
     evaluate.add_argument("--ground-truth", type=_path, required=True)
     evaluate.add_argument("--engine", choices=("snort", "suricata"), required=True)
+    evaluate.add_argument("--run-id", type=int)
     evaluate.add_argument("--output", type=_path, required=True)
     evaluate.set_defaults(handler=_evaluate)
+
+    aggregate = subparsers.add_parser(
+        "aggregate-evaluations", help="aggregate repeated paired-fixture evaluations"
+    )
+    aggregate.add_argument("--input", type=_path, action="append", required=True)
+    aggregate.add_argument("--output", type=_path, required=True)
+    aggregate.set_defaults(handler=_aggregate_evaluations)
     return parser
 
 

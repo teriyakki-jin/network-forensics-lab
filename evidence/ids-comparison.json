@@ -61,8 +61,8 @@
       "delta": 0,
       "detected_by_both": true,
       "scenario": "icmp_echo",
-      "snort_alerts": 3,
-      "suricata_alerts": 3,
+      "snort_alerts": 1,
+      "suricata_alerts": 1,
       "title": "LAB ICMP Echo Request"
     },
     {
@@ -107,7 +107,7 @@
   ],
   "schema_version": 1,
   "totals": {
-    "snort": 45,
-    "suricata": 45
+    "snort": 43,
+    "suricata": 43
   }
 }

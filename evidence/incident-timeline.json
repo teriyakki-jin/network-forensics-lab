@@ -17,79 +17,7 @@
         "ip": "10.77.0.20",
         "port": null
       },
-      "timestamp": "2026-09-08T07:17:01.023478+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": null
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB ICMP Echo Request",
-        "id": "1000001"
-      },
-      "scenario": "icmp_echo",
-      "sequence": 2,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": null
-      },
-      "timestamp": "2026-09-08T07:17:01Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": null
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB ICMP Echo Request",
-        "id": "1000001"
-      },
-      "scenario": "icmp_echo",
-      "sequence": 3,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": null
-      },
-      "timestamp": "2026-09-08T07:17:02.025878+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": null
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB ICMP Echo Request",
-        "id": "1000001"
-      },
-      "scenario": "icmp_echo",
-      "sequence": 4,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": null
-      },
-      "timestamp": "2026-09-08T07:17:02Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": null
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB ICMP Echo Request",
-        "id": "1000001"
-      },
-      "scenario": "icmp_echo",
-      "sequence": 5,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": null
-      },
-      "timestamp": "2026-09-08T07:17:03.049870+0000"
+      "timestamp": "2026-09-08T10:59:03.747805+0000"
     },
     {
       "destination": {
@@ -102,174 +30,12 @@
         "id": "1000002"
       },
       "scenario": "http_admin_probe",
-      "sequence": 6,
+      "sequence": 2,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48650
+        "port": 46666
       },
-      "timestamp": "2026-09-08T07:17:03.056445+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 18
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 7,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202168+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 4
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 8,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202183+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 7
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 9,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202199+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 28
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 10,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202214+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 30
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 11,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202228+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 27
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 12,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202242+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 12
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 13,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202284+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 14
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 14,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202298+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 6
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 15,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202370+0000"
+      "timestamp": "2026-09-08T10:59:03.759709+0000"
     },
     {
       "destination": {
@@ -282,17 +48,17 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 16,
+      "sequence": 3,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202386+0000"
+      "timestamp": "2026-09-08T10:59:03.932623+0000"
     },
     {
       "destination": {
         "ip": "10.77.0.10",
-        "port": 1
+        "port": 7
       },
       "engine": "suricata",
       "rule": {
@@ -300,12 +66,12 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 17,
+      "sequence": 4,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202400+0000"
+      "timestamp": "2026-09-08T10:59:03.932644+0000"
     },
     {
       "destination": {
@@ -318,17 +84,17 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 18,
+      "sequence": 5,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202415+0000"
+      "timestamp": "2026-09-08T10:59:03.932665+0000"
     },
     {
       "destination": {
         "ip": "10.77.0.10",
-        "port": 8
+        "port": 1
       },
       "engine": "suricata",
       "rule": {
@@ -336,12 +102,228 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 19,
+      "sequence": 6,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202429+0000"
+      "timestamp": "2026-09-08T10:59:03.932685+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 12
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 7,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932706+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 11
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 8,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932727+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 6
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 9,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932813+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 19
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 10,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932869+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 9
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 11,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932899+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 5
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 12,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932921+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 30
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 13,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932941+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 4
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 14,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932962+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 14
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 15,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.932983+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 28
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 16,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933004+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 18
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 17,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933024+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 27
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 18,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933044+0000"
     },
     {
       "destination": {
@@ -354,17 +336,35 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 20,
+      "sequence": 19,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202442+0000"
+      "timestamp": "2026-09-08T10:59:03.933064+0000"
     },
     {
       "destination": {
         "ip": "10.77.0.10",
-        "port": 3
+        "port": 20
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 20,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933199+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 8
       },
       "engine": "suricata",
       "rule": {
@@ -375,9 +375,9 @@
       "sequence": 21,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202456+0000"
+      "timestamp": "2026-09-08T10:59:03.933328+0000"
     },
     {
       "destination": {
@@ -393,117 +393,9 @@
       "sequence": 22,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202469+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 10
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 23,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202484+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 9
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 24,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202498+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 20
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 25,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202513+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 16
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 26,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202527+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 5
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 27,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202541+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 26
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 28,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202555+0000"
+      "timestamp": "2026-09-08T10:59:03.933537+0000"
     },
     {
       "destination": {
@@ -516,12 +408,84 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 29,
+      "sequence": 23,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202568+0000"
+      "timestamp": "2026-09-08T10:59:03.933569+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 3
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 24,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933591+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 10
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 25,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933612+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 26
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 26,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933634+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 16
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 27,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03.933655+0000"
     },
     {
       "destination": {
@@ -534,48 +498,12 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 30,
+      "sequence": 28,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03.202582+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 19
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 31,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202595+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 11
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 32,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03.202609+0000"
+      "timestamp": "2026-09-08T10:59:03.933676+0000"
     },
     {
       "destination": {
@@ -588,264 +516,12 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 33,
+      "sequence": 29,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48666
+        "port": 46674
       },
-      "timestamp": "2026-09-08T07:17:03.277159+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 34,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48668
-      },
-      "timestamp": "2026-09-08T07:17:03.287557+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 35,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48678
-      },
-      "timestamp": "2026-09-08T07:17:03.297345+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 36,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48682
-      },
-      "timestamp": "2026-09-08T07:17:03.305247+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 37,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48692
-      },
-      "timestamp": "2026-09-08T07:17:03.314947+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 38,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48694
-      },
-      "timestamp": "2026-09-08T07:17:03.323162+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB HTTP Basic Auth Brute Force",
-        "id": "1000004"
-      },
-      "scenario": "brute_force",
-      "sequence": 39,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48694
-      },
-      "timestamp": "2026-09-08T07:17:03.323427+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 40,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 58211
-      },
-      "timestamp": "2026-09-08T07:17:03.333586+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 41,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 40566
-      },
-      "timestamp": "2026-09-08T07:17:03.347249+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 42,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 36626
-      },
-      "timestamp": "2026-09-08T07:17:03.359905+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 43,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 58681
-      },
-      "timestamp": "2026-09-08T07:17:03.372129+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 44,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48710
-      },
-      "timestamp": "2026-09-08T07:17:03.381987+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB SQL Injection Probe",
-        "id": "1000006"
-      },
-      "scenario": "web_exploit",
-      "sequence": 45,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48710
-      },
-      "timestamp": "2026-09-08T07:17:03.382315+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.30",
-        "port": 13400
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB DoIP Unauthorized Diagnostic Session",
-        "id": "1000007"
-      },
-      "scenario": "doip_unauthorized_diagnostic",
-      "sequence": 46,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 55818
-      },
-      "timestamp": "2026-09-08T07:17:03.391391+0000"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.30",
-        "port": 30490
-      },
-      "engine": "suricata",
-      "rule": {
-        "description": "LAB SOME/IP Unauthorized Service Discovery",
-        "id": "1000008"
-      },
-      "scenario": "someip_service_discovery",
-      "sequence": 47,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 60458
-      },
-      "timestamp": "2026-09-08T07:17:03.397153+0000"
+      "timestamp": "2026-09-08T10:59:03.997228+0000"
     },
     {
       "destination": {
@@ -858,12 +534,12 @@
         "id": "1000001"
       },
       "scenario": "icmp_echo",
-      "sequence": 48,
+      "sequence": 30,
       "source": {
         "ip": "10.77.0.20",
         "port": null
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
@@ -876,174 +552,12 @@
         "id": "1000002"
       },
       "scenario": "http_admin_probe",
-      "sequence": 49,
+      "sequence": 31,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48650
+        "port": 46666
       },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 18
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 50,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 4
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 51,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 7
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 52,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 28
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 53,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 30
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 54,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 27
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 55,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 12
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 56,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 14
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 57,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 6
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 58,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
@@ -1056,17 +570,17 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 59,
+      "sequence": 32,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
         "ip": "10.77.0.10",
-        "port": 1
+        "port": 7
       },
       "engine": "snort",
       "rule": {
@@ -1074,12 +588,12 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 60,
+      "sequence": 33,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
@@ -1092,17 +606,17 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 61,
+      "sequence": 34,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
         "ip": "10.77.0.10",
-        "port": 8
+        "port": 1
       },
       "engine": "snort",
       "rule": {
@@ -1110,17 +624,17 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 62,
+      "sequence": 35,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
         "ip": "10.77.0.10",
-        "port": 13
+        "port": 12
       },
       "engine": "snort",
       "rule": {
@@ -1128,210 +642,12 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 63,
+      "sequence": 36,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 39057
       },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 3
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 64,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 2
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 65,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 10
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 66,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 9
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 67,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 20
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 68,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 16
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 69,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 5
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 70,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 26
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 71,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 29
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 72,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 24
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 73,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 19
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 74,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 33929
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:03Z"
     },
     {
       "destination": {
@@ -1344,12 +660,696 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
+      "sequence": 37,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 6
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 38,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 19
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 39,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 9
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 40,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 5
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 41,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 30
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 42,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 4
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 43,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 14
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 44,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 28
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 45,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 18
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 46,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 27
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 47,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 13
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 48,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 20
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 49,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 8
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 50,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 2
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 51,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 29
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 52,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 3
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 53,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 10
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 54,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 26
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 55,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 16
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 56,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 24
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 57,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 39057
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 58,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46674
+      },
+      "timestamp": "2026-09-08T10:59:03Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 59,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46686
+      },
+      "timestamp": "2026-09-08T10:59:04.004493+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 60,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46696
+      },
+      "timestamp": "2026-09-08T10:59:04.011412+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 61,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46698
+      },
+      "timestamp": "2026-09-08T10:59:04.019181+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 62,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46700
+      },
+      "timestamp": "2026-09-08T10:59:04.026118+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 63,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46708
+      },
+      "timestamp": "2026-09-08T10:59:04.032947+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB HTTP Basic Auth Brute Force",
+        "id": "1000004"
+      },
+      "scenario": "brute_force",
+      "sequence": 64,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46708
+      },
+      "timestamp": "2026-09-08T10:59:04.033305+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 65,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 44721
+      },
+      "timestamp": "2026-09-08T10:59:04.044787+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 66,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 37197
+      },
+      "timestamp": "2026-09-08T10:59:04.055994+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 67,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 55636
+      },
+      "timestamp": "2026-09-08T10:59:04.068669+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 68,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 35749
+      },
+      "timestamp": "2026-09-08T10:59:04.080225+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 69,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46710
+      },
+      "timestamp": "2026-09-08T10:59:04.087222+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB SQL Injection Probe",
+        "id": "1000006"
+      },
+      "scenario": "web_exploit",
+      "sequence": 70,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46710
+      },
+      "timestamp": "2026-09-08T10:59:04.087460+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.30",
+        "port": 13400
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB DoIP Unauthorized Diagnostic Session",
+        "id": "1000007"
+      },
+      "scenario": "doip_unauthorized_diagnostic",
+      "sequence": 71,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 37936
+      },
+      "timestamp": "2026-09-08T10:59:04.093947+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.30",
+        "port": 30490
+      },
+      "engine": "suricata",
+      "rule": {
+        "description": "LAB SOME/IP Unauthorized Service Discovery",
+        "id": "1000008"
+      },
+      "scenario": "someip_service_discovery",
+      "sequence": 72,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 56322
+      },
+      "timestamp": "2026-09-08T10:59:04.099365+0000"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 73,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46686
+      },
+      "timestamp": "2026-09-08T10:59:04Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
+      "sequence": 74,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46696
+      },
+      "timestamp": "2026-09-08T10:59:04Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.10",
+        "port": 80
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB TCP SYN Scan",
+        "id": "1000003"
+      },
+      "scenario": "tcp_syn_scan",
       "sequence": 75,
       "source": {
         "ip": "10.77.0.20",
-        "port": 33929
+        "port": 46698
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1365,9 +1365,9 @@
       "sequence": 76,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48666
+        "port": 46700
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1383,81 +1383,9 @@
       "sequence": 77,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48668
+        "port": 46708
       },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 78,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48678
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 79,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48682
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 80,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48692
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.10",
-        "port": 80
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB TCP SYN Scan",
-        "id": "1000003"
-      },
-      "scenario": "tcp_syn_scan",
-      "sequence": 81,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 48694
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1470,84 +1398,84 @@
         "id": "1000004"
       },
       "scenario": "brute_force",
+      "sequence": 78,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 46708
+      },
+      "timestamp": "2026-09-08T10:59:04Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 79,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 44721
+      },
+      "timestamp": "2026-09-08T10:59:04Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 80,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 37197
+      },
+      "timestamp": "2026-09-08T10:59:04Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
+      "sequence": 81,
+      "source": {
+        "ip": "10.77.0.20",
+        "port": 55636
+      },
+      "timestamp": "2026-09-08T10:59:04Z"
+    },
+    {
+      "destination": {
+        "ip": "10.77.0.53",
+        "port": 53
+      },
+      "engine": "snort",
+      "rule": {
+        "description": "LAB DNS Tunneling Pattern",
+        "id": "1000005"
+      },
+      "scenario": "dns_tunneling",
       "sequence": 82,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48694
+        "port": 35749
       },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 83,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 58211
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 84,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 40566
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 85,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 36626
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
-    },
-    {
-      "destination": {
-        "ip": "10.77.0.53",
-        "port": 53
-      },
-      "engine": "snort",
-      "rule": {
-        "description": "LAB DNS Tunneling Pattern",
-        "id": "1000005"
-      },
-      "scenario": "dns_tunneling",
-      "sequence": 86,
-      "source": {
-        "ip": "10.77.0.20",
-        "port": 58681
-      },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1560,12 +1488,12 @@
         "id": "1000003"
       },
       "scenario": "tcp_syn_scan",
-      "sequence": 87,
+      "sequence": 83,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48710
+        "port": 46710
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1578,12 +1506,12 @@
         "id": "1000006"
       },
       "scenario": "web_exploit",
-      "sequence": 88,
+      "sequence": 84,
       "source": {
         "ip": "10.77.0.20",
-        "port": 48710
+        "port": 46710
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1596,12 +1524,12 @@
         "id": "1000007"
       },
       "scenario": "doip_unauthorized_diagnostic",
-      "sequence": 89,
+      "sequence": 85,
       "source": {
         "ip": "10.77.0.20",
-        "port": 55818
+        "port": 37936
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     },
     {
       "destination": {
@@ -1614,12 +1542,12 @@
         "id": "1000008"
       },
       "scenario": "someip_service_discovery",
-      "sequence": 90,
+      "sequence": 86,
       "source": {
         "ip": "10.77.0.20",
-        "port": 60458
+        "port": 56322
       },
-      "timestamp": "2026-09-08T07:17:03Z"
+      "timestamp": "2026-09-08T10:59:04Z"
     }
   ],
   "schema_version": 1

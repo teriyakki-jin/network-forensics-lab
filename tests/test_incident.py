@@ -5,7 +5,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from forensics.incident import build_case_manifest, build_timeline, evaluate_detection
+from forensics.incident import (
+    aggregate_evaluations,
+    build_case_manifest,
+    build_timeline,
+    evaluate_detection,
+)
 
 
 class DetectionEvaluationTests(unittest.TestCase):
@@ -38,6 +43,49 @@ class DetectionEvaluationTests(unittest.TestCase):
             evaluate_detection([], duplicate, engine="snort")
         with self.assertRaisesRegex(ValueError, "label"):
             evaluate_detection([], [{"scenario": "bad", "label": "unknown"}], engine="snort")
+
+    def test_scores_the_same_scenario_independently_for_attack_and_benign_fixtures(self) -> None:
+        ground_truth = [
+            {"fixture_id": "attack", "scenario": "doip", "label": "attack"},
+            {"fixture_id": "benign", "scenario": "doip", "label": "benign"},
+        ]
+        alerts = [
+            {"fixture_id": "attack", "engine": "snort", "scenario": "doip"},
+        ]
+
+        result = evaluate_detection(alerts, ground_truth, engine="snort")
+
+        self.assertEqual(result["confusion_matrix"], {"tp": 1, "fp": 0, "fn": 0, "tn": 1})
+        self.assertEqual(result["scope"]["ground_truth_cases"], 2)
+        self.assertEqual(result["scope"]["ground_truth_scenarios"], 1)
+        self.assertEqual(
+            result["scope"]["detected_cases"],
+            [{"fixture_id": "attack", "scenario": "doip"}],
+        )
+
+
+class EvaluationAggregationTests(unittest.TestCase):
+    def test_aggregates_repeated_runs_without_inflating_unique_scenarios(self) -> None:
+        reports = []
+        for run_id in (1, 2):
+            for engine in ("snort", "suricata"):
+                reports.append(
+                    {
+                        "run_id": run_id,
+                        "engine": engine,
+                        "confusion_matrix": {"tp": 8, "fp": 0, "fn": 0, "tn": 8},
+                        "scope": {"ground_truth_cases": 16},
+                    }
+                )
+
+        result = aggregate_evaluations(reports)
+
+        self.assertEqual(result["scope"]["repeated_runs"], 2)
+        self.assertEqual(result["scope"]["unique_attack_scenarios"], 8)
+        self.assertEqual(result["scope"]["unique_benign_scenarios"], 8)
+        self.assertEqual(result["engines"]["snort"]["observations"], 32)
+        self.assertEqual(result["engines"]["snort"]["metrics"]["recall"], 1.0)
+        self.assertEqual(result["engines"]["suricata"]["repeatability"], "2/2")
 
 
 class CaseManifestTests(unittest.TestCase):
