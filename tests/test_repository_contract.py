@@ -151,6 +151,7 @@ class AutomationContractTests(unittest.TestCase):
         for script in (snort, suricata):
             self.assertIn("PCAP_FILE", script)
             self.assertIn("OUTPUT_DIR", script)
+            self.assertIn("chmod -R a+rX", script)
 
     def test_evaluation_script_uses_paired_fixtures_and_five_runs(self) -> None:
         script = (ROOT / "scripts" / "run-evaluation.ps1").read_text(encoding="utf-8")
