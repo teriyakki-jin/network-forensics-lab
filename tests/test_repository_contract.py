@@ -163,6 +163,13 @@ class AutomationContractTests(unittest.TestCase):
         self.assertIn("Get-FileHash", script)
         self.assertIn(".sha256", script)
 
+    def test_evaluation_script_makes_bind_mount_output_writable_on_linux(self) -> None:
+        script = (ROOT / "scripts" / "run-evaluation.ps1").read_text(encoding="utf-8")
+        self.assertIn("Set-ContainerOutputPermissions", script)
+        self.assertIn("$IsLinux", script)
+        self.assertIn("chmod", script)
+        self.assertIn("a+rwx", script)
+
     def test_workflow_runs_paired_fixture_regression(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding="utf-8")
         self.assertIn("run-evaluation.ps1", workflow)

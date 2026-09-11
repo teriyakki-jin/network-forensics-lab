@@ -34,11 +34,23 @@ function Invoke-Forensics {
     }
 }
 
+function Set-ContainerOutputPermissions {
+    param([Parameter(Mandatory)][string]$Path)
+
+    if ($IsLinux) {
+        & chmod a+rwx -- $Path
+        if ($LASTEXITCODE -ne 0) {
+            throw "chmod failed for container output directory: $Path"
+        }
+    }
+}
+
 New-Item -ItemType Directory -Path $EvidenceRoot -Force | Out-Null
 if (Test-Path -LiteralPath $AlertRoot) {
     Remove-Item -LiteralPath $AlertRoot -Recurse -Force
 }
 New-Item -ItemType Directory -Path $AlertRoot -Force | Out-Null
+Set-ContainerOutputPermissions -Path $AlertRoot
 
 if (-not $UseCommittedFixtures) {
     Write-Host '[1/4] Starting isolated fixture network'
@@ -94,6 +106,7 @@ foreach ($Run in 1..$RepeatCount) {
         $RelativeOutput = "evaluation/run-$Run/$Fixture"
         $HostOutput = Join-Path $AlertRoot "run-$Run\$Fixture"
         New-Item -ItemType Directory -Path $HostOutput -Force | Out-Null
+        Set-ContainerOutputPermissions -Path $HostOutput
 
         Invoke-Compose --profile tools run --rm `
             -e "PCAP_FILE=evaluation/$PcapName" `
